@@ -1,0 +1,5 @@
+check process jaeger-all-in-one
+  with pidfile /var/vcap/sys/run/bpm/jaeger-all-in-one/jaeger-all-in-one.pid
+  start program "/var/vcap/jobs/bpm/bin/bpm start jaeger-all-in-one"
+  stop program "/var/vcap/jobs/bpm/bin/bpm stop jaeger-all-in-one"
+  group vcap

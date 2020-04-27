@@ -1,0 +1,7 @@
+---
+name: jaeger
+
+dependencies: []
+
+files:
+- jaeger-linux-amd64.tar.gz

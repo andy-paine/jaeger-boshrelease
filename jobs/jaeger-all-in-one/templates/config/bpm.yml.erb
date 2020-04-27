@@ -1,0 +1,6 @@
+processes:
+  - name: jaeger-all-in-one
+    executable: /var/vcap/packages/jaeger/jaeger-all-in-one
+    args:
+    - --config
+    - /var/vcap/jobs/jaeger-all-in-one/config/jaeger.yml
