@@ -1,6 +1,34 @@
+<%-
+  require 'yaml'
+  supported_types = ['memory', 'badger', 'elasticsearch', 'cassandra']
+  raise "Only #{supported_types} are supported values for span_storage_type, not: #{p('span_storage_type')}" unless supported_types.include? p('span_storage_type')
+
+  flags = case p('span_storage_type')
+  when 'badger'
+    [
+      "--badger.ephemeral=false",
+      "--badger.directory-key=/var/vcap/store/jaeger-all-in-one/keys",
+      "--badger.directory-value=/var/vcap/store/jaeger-all-in-one/values",
+    ]
+  else
+    []
+  end
+-%>
 processes:
   - name: jaeger-all-in-one
     executable: /var/vcap/packages/jaeger/jaeger-all-in-one
+    env:
+      SPAN_STORAGE_TYPE: <%= p('span_storage_type') %>
+    <%- if p('span_storage_type') == 'badger' %>
+    additional_volumes:
+    - path: /var/vcap/store/jaeger-all-in-one/keys
+      writable: true
+    - path: /var/vcap/store/jaeger-all-in-one/values
+      writable: true
+    <%- end %>
+
     args:
-    - --config
-    - /var/vcap/jobs/jaeger-all-in-one/config/jaeger.yml
+    - --admin-http-port=14269
+    <%- flags.each do |flag| -%>
+    - <%= flag %>
+    <%- end -%>

@@ -5,8 +5,8 @@ packages:
 
 templates:
   config/bpm.yml.erb: config/bpm.yml
-  config/jaeger.yml.erb: config/jaeger.yml
 
 properties:
-  config_yml:
-    description: YAML config for Jaeger all in one
+  span_storage_type:
+    description: "What span storage type to use. Supported values are: memory, badger, elasticsearch, cassandra"
+    default: badger
