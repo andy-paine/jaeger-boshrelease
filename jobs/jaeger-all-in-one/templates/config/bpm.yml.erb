@@ -1,20 +1,21 @@
 <%-
   require 'yaml'
-  supported_types = ['memory', 'badger', 'elasticsearch', 'cassandra']
-  raise "Only #{supported_types} are supported values for span_storage_type, not: #{p('span_storage_type')}" unless supported_types.include? p('span_storage_type')
   flags = []
 
-  collector_props = ['grpc-port', 'http-port', 'num-workers', 'port', 'queue-size', 'queue-size-memory', 'zipkin.http-port' ]
-  flags += collector_props.map do |property|
-    property_value = p("collector.#{property}")
-    "--collector.#{property}=#{property_value}"
+  # Collector directly mapped variables
+  ['collector.grpc-port', 'collector.http-port', 'collector.num-workers', 'collector.port', 'collector.queue-size', 'collector.queue-size-memory', 'collector.zipkin.http-port' ].each do |property|
+    flags << "--#{property}=#{p(property)}"
   end
-  if_p('collector.tags') do |tags|
-    flags << "--collector.tags='#{tags.map do |key,value| "#{key}=#{value}" end.join(',')}'"
-  end
+
+  # Collector formatted collections
   flags << "--collector.zipkin.allowed-headers='#{p('collector.zipkin.allowed-headers').join(',')}'"
   flags << "--collector.zipkin.allowed-origins='#{p('collector.zipkin.allowed-origins').join(',')}'"
+  if_p('collector.tags') do |tags|
+    formatted_tags = tags.map { |key,value| "#{key}=#{value}" }.join(',')
+    flags << "--collector.tags='#{formatted_tags}'"
+  end
 
+  # Collector TLS configuration
   if_p('collector.grpc.tls.private_key', 'collector.grpc.tls.certificate') do |key, cert|
     flags << '--collector.grpc.tls.enabled=true'
     flags << '--collector.grpc.tls.key=/var/vcap/jobs/jaeger-all-in-one/tls/grpc.key'
@@ -26,11 +27,15 @@
     flags << '--collector.grpc.tls.client-ca=/var/vcap/jobs/jaeger-all-in-one/tls/grpc-client-ca.crt'
   end
 
+  # Storage configuration
   case p('span_storage_type')
+  when 'memory'
   when 'badger'
     flags << "--badger.ephemeral=false"
     flags << "--badger.directory-key=/var/vcap/store/jaeger-all-in-one/keys"
     flags << "--badger.directory-value=/var/vcap/store/jaeger-all-in-one/values"
+  else
+    raise "Only ['memory', 'badger'] are supported values for span_storage_type, not: #{p('span_storage_type')}"
   end
 -%>
 processes:
