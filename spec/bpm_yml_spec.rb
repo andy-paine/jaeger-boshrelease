@@ -5,8 +5,6 @@ require 'yaml'
 require 'bosh/template/test'
 require_relative 'spec_helper.rb'
 
-RSpec::Expectations.configuration.on_potential_false_positives = :nothing
-
 describe 'jaeger-all-in-one bpm.yml' do
   let(:release) { Bosh::Template::Test::ReleaseDir.new(File.join(File.dirname(__FILE__), '../')) }
   let(:job) { release.job('jaeger-all-in-one') }
@@ -15,7 +13,7 @@ describe 'jaeger-all-in-one bpm.yml' do
   describe 'storage types' do
     it 'only allows supported span_storage_types' do
       expect{ template.render({'span_storage_type' => 'memory'}) }.not_to raise_error
-      expect{ template.render({'span_storage_type' => 'foo'}) }.to raise_error
+      expect{ template.render({'span_storage_type' => 'foo'}) }.to raise_error(/Only .* are supported values for span_storage_type, not: foo/)
     end
   end
 
