@@ -5,8 +5,60 @@ packages:
 
 templates:
   config/bpm.yml.erb: config/bpm.yml
+  tls/grpc.key.erb: tls/grpc.key
+  tls/grpc.crt.erb: tls/grpc.crt
+  tls/grpc-client-ca.crt.erb: tls/grpc-client-ca.crt
 
 properties:
   span_storage_type:
     description: "What span storage type to use. Supported values are: memory, badger, elasticsearch, cassandra"
     default: badger
+  collector.grpc-port:
+    description: "The gRPC port for the collector service"
+    default: 14250
+  collector.grpc.tls.client-ca:
+    description: CA certificate used to verify certificates presented by clients (if unset, all clients are permitted)
+    example: |
+      -----BEGIN CERTIFICATE-----
+      etc.
+  collector.grpc.tls.certificate:
+    description: TLS certificate, used to identify this server to clients
+    example: |
+      -----BEGIN CERTIFICATE-----
+      etc.
+  collector.grpc.tls.private_key:
+    description: TLS private key, used to identify this server to clients
+    example: |
+      -----BEGIN RSA PRIVATE KEY-----
+      etc.
+  collector.http-port:
+    description: The HTTP port for the collector service
+    default: 14268
+  collector.num-workers:
+    description: The number of workers pulling items from the queue
+    default: 50
+  collector.port:
+    description: The TChannel port for the collector service
+    default: 14267
+  collector.queue-size:
+    description: The queue size of the collector
+    default: 2000
+  collector.queue-size-memory:
+    description: (Experimental) The max memory size in MiB to use for the dynamic queue
+    default: 0
+  collector.tags:
+    description: One or more tags to be added to the Process tags of all spans passing through this collector
+    example:
+      env: foo
+      region: bar
+  collector.zipkin.allowed-headers:
+    description: List of allowed headers for the Zipkin collector service
+    default:
+    - content-type
+  collector.zipkin.allowed-origins:
+    description: List of allowed origins for the Zipkin collector service
+    default:
+    - "*"
+  collector.zipkin.http-port:
+    description: The HTTP port for the Zipkin collector service e.g. 9411
+    default: 0
