@@ -5,9 +5,9 @@ packages:
 
 templates:
   config/bpm.yml.erb: config/bpm.yml
-  tls/grpc.key.erb: tls/grpc.key
-  tls/grpc.crt.erb: tls/grpc.crt
-  tls/grpc-client-ca.crt.erb: tls/grpc-client-ca.crt
+  tls/collector/grpc.key.erb: tls/collector/grpc.key
+  tls/collector/grpc.crt.erb: tls/collector/grpc.crt
+  tls/collector/grpc-client-ca.crt.erb: tls/collector/grpc-client-ca.crt
   tls/reporter/grpc.key.erb: tls/reporter/grpc.key
   tls/reporter/grpc.crt.erb: tls/reporter/grpc.crt
   tls/reporter/grpc-ca.crt.erb: tls/reporter/grpc-ca.crt

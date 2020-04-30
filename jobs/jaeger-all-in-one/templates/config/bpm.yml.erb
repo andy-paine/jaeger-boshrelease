@@ -25,13 +25,13 @@
   # Collector TLS configuration
   if_p('collector.grpc.tls.private_key', 'collector.grpc.tls.certificate') do |key, cert|
     flags << '--collector.grpc.tls.enabled=true'
-    flags << '--collector.grpc.tls.key=/var/vcap/jobs/jaeger-all-in-one/tls/grpc.key'
-    flags << '--collector.grpc.tls.cert=/var/vcap/jobs/jaeger-all-in-one/tls/grpc.crt'
+    flags << '--collector.grpc.tls.key=/var/vcap/jobs/jaeger-all-in-one/tls/collector/grpc.key'
+    flags << '--collector.grpc.tls.cert=/var/vcap/jobs/jaeger-all-in-one/tls/collector/grpc.crt'
   end.else do
     flags << '--collector.grpc.tls.enabled=false'
   end
   if_p('collector.grpc.tls.client-ca') do |_|
-    flags << '--collector.grpc.tls.client-ca=/var/vcap/jobs/jaeger-all-in-one/tls/grpc-client-ca.crt'
+    flags << '--collector.grpc.tls.client-ca=/var/vcap/jobs/jaeger-all-in-one/tls/collector/grpc-client-ca.crt'
   end
 
   if_p('reporter.grpc.host-port') do |host_port|

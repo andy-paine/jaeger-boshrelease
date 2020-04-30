@@ -63,14 +63,14 @@ describe 'jaeger-all-in-one bpm.yml' do
       config = { 'collector' => { 'grpc' => { 'tls' => { 'private_key' => '--- BEGIN KEY ---', 'certificate' => '--- BEGIN CERT ---' }}}}
       args = get_process_from_bpm(YAML::load template.render(config))['args']
       expect(args).to include '--collector.grpc.tls.enabled=true'
-      expect(args).to include '--collector.grpc.tls.cert=/var/vcap/jobs/jaeger-all-in-one/tls/grpc.crt'
-      expect(args).to include '--collector.grpc.tls.key=/var/vcap/jobs/jaeger-all-in-one/tls/grpc.key'
+      expect(args).to include '--collector.grpc.tls.cert=/var/vcap/jobs/jaeger-all-in-one/tls/collector/grpc.crt'
+      expect(args).to include '--collector.grpc.tls.key=/var/vcap/jobs/jaeger-all-in-one/tls/collector/grpc.key'
     end
 
     it 'should include grpc client-ca cert when provided' do
       config = { 'collector' => { 'grpc' => { 'tls' => { 'client-ca' => '--- BEGIN CERT ---' }}}}
       args = get_process_from_bpm(YAML::load template.render(config))['args']
-      expect(args).to include '--collector.grpc.tls.client-ca=/var/vcap/jobs/jaeger-all-in-one/tls/grpc-client-ca.crt'
+      expect(args).to include '--collector.grpc.tls.client-ca=/var/vcap/jobs/jaeger-all-in-one/tls/collector/grpc-client-ca.crt'
     end
 
     it 'should include tags as a comma separated list of key=value' do
