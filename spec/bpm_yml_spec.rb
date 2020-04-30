@@ -30,6 +30,12 @@ describe 'jaeger-all-in-one bpm.yml' do
       expect(args).to include '--badger.ephemeral=false'
       expect(args).to include '--badger.directory-key=/var/vcap/store/jaeger-all-in-one/keys'
       expect(args).to include '--badger.directory-value=/var/vcap/store/jaeger-all-in-one/values'
+      expect(args).to include '--badger.consistency=false'
+      expect(args).to include '--badger.maintenance-interval=5m0s'
+      expect(args).to include '--badger.metrics-update-interval=10s'
+      expect(args).to include '--badger.read-only=false'
+      expect(args).to include '--badger.span-store-ttl=72h0m0s'
+      expect(args).to include '--badger.truncate=false'
     end
   end
 

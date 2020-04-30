@@ -13,6 +13,24 @@ properties:
   span_storage_type:
     description: "What span storage type to use. Supported values are: memory, badger, elasticsearch, cassandra"
     default: badger
+  badger.consistency:
+    description: If all writes should be synced immediately to physical disk. This will impact write performance.
+    default: false
+  badger.maintenance-interval:
+    description: "How often the maintenance thread for values is ran. Format is time.Duration (https://golang.org/pkg/time/#Duration)"
+    default: 5m0s
+  badger.metrics-update-interval:
+    description: "How often the badger metrics are collected by Jaeger. Format is time.Duration (https://golang.org/pkg/time/#Duration)"
+    default: 10s
+  badger.read-only:
+    description: Allows to open badger database in read only mode. Multiple instances can open same database in read-only mode. Values still in the write-ahead-log must be replayed before opening.
+    default: false
+  badger.span-store-ttl:
+    description: "How long to store the data. Format is time.Duration (https://golang.org/pkg/time/#Duration)"
+    default: 72h0m0s
+  badger.truncate:
+    description: If write-ahead-log should be truncated on restart. this will cause data loss.
+    default: false
   collector.grpc-port:
     description: "The gRPC port for the collector service"
     default: 14250

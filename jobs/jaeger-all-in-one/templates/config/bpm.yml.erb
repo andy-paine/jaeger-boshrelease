@@ -34,6 +34,9 @@
     flags << "--badger.ephemeral=false"
     flags << "--badger.directory-key=/var/vcap/store/jaeger-all-in-one/keys"
     flags << "--badger.directory-value=/var/vcap/store/jaeger-all-in-one/values"
+    ['badger.consistency', 'badger.maintenance-interval', 'badger.metrics-update-interval', 'badger.read-only', 'badger.span-store-ttl', 'badger.truncate'].each do |property|
+      flags << "--#{property}=#{p(property)}"
+    end
   else
     raise "Only ['memory', 'badger'] are supported values for span_storage_type, not: #{p('span_storage_type')}"
   end
