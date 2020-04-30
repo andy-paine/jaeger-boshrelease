@@ -104,4 +104,49 @@ describe 'jaeger-all-in-one bpm.yml' do
       expect(args).to include '--processor.zipkin-compact.workers=10'
     end
   end
+
+  describe 'reporter configuration' do
+    it 'should set sensible defaults for reporter configuration' do
+      args = get_process_from_bpm(YAML::load template.render({}))['args']
+      expect(args).to include '--reporter.grpc.discovery.min-peers=3'
+      expect(args).to include '--reporter.grpc.retry.max=3'
+      expect(args).to include '--reporter.grpc.tls.enabled=false'
+      expect(args).to include '--reporter.grpc.tls.skip-host-verify=false'
+
+      expect(args).to_not include '--reporter.grpc.host-port'
+      expect(args).to_not include '--reporter.grpc.tls.ca'
+      expect(args).to_not include '--reporter.grpc.tls.cert'
+      expect(args).to_not include '--reporter.grpc.tls.key'
+      expect(args).to_not include '--reporter.grpc.tls.server-name'
+    end
+
+    let(:config) {
+      { 'reporter' => { 'grpc' => { 'tls' => { 'private_key' => '--- BEGIN KEY ---', 'certificate' => '--- BEGIN CERT ---' }}}}
+    }
+
+    it 'should enable grpc tls when a key and certificate are provided' do
+      args = get_process_from_bpm(YAML::load template.render(config))['args']
+      expect(args).to include '--reporter.grpc.tls.enabled=true'
+      expect(args).to include '--reporter.grpc.tls.cert=/var/vcap/jobs/jaeger-all-in-one/tls/reporter/grpc.crt'
+      expect(args).to include '--reporter.grpc.tls.key=/var/vcap/jobs/jaeger-all-in-one/tls/reporter/grpc.key'
+    end
+
+    it 'should include grpc ca cert when provided' do
+      config['reporter']['grpc']['tls']['ca'] = '--- BEGIN CERT ---'
+      args = get_process_from_bpm(YAML::load template.render(config))['args']
+      expect(args).to include '--reporter.grpc.tls.ca=/var/vcap/jobs/jaeger-all-in-one/tls/reporter/grpc-ca.crt'
+    end
+
+    it 'should include set grpc server name when provided' do
+      config['reporter']['grpc']['tls']['server-name'] = 'example.com'
+      args = get_process_from_bpm(YAML::load template.render(config))['args']
+      expect(args).to include '--reporter.grpc.tls.server-name=example.com'
+    end
+
+    it 'should provide grpc host-ports as comma separated list' do
+      config = { 'reporter' => { 'grpc' => { 'host-port' => ['host1:port1', 'host2:port2'] }}}
+      args = get_process_from_bpm(YAML::load template.render(config))['args']
+      expect(args).to include "--reporter.grpc.host-port='host1:port1,host2:port2'"
+    end
+  end
 end

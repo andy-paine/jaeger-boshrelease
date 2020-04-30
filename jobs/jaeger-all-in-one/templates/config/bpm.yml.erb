@@ -9,6 +9,7 @@
     'processor.jaeger-binary.server-host-port', 'processor.jaeger-binary.server-max-packet-size', 'processor.jaeger-binary.server-queue-size', 'processor.jaeger-binary.workers',
     'processor.jaeger-compact.server-host-port', 'processor.jaeger-compact.server-max-packet-size', 'processor.jaeger-compact.server-queue-size', 'processor.jaeger-compact.workers',
     'processor.zipkin-compact.server-host-port', 'processor.zipkin-compact.server-max-packet-size', 'processor.zipkin-compact.server-queue-size', 'processor.zipkin-compact.workers',
+    'reporter.grpc.discovery.min-peers', 'reporter.grpc.retry.max', 'reporter.grpc.tls.skip-host-verify',
   ].each do |property|
     flags << "--#{property}=#{p(property)}"
   end
@@ -31,6 +32,23 @@
   end
   if_p('collector.grpc.tls.client-ca') do |_|
     flags << '--collector.grpc.tls.client-ca=/var/vcap/jobs/jaeger-all-in-one/tls/grpc-client-ca.crt'
+  end
+
+  if_p('reporter.grpc.host-port') do |host_port|
+    flags << "--reporter.grpc.host-port='#{p('reporter.grpc.host-port').join(',')}'"
+  end
+  if_p('reporter.grpc.tls.private_key', 'reporter.grpc.tls.certificate') do |key,cert|
+    flags << '--reporter.grpc.tls.enabled=true'
+    flags << '--reporter.grpc.tls.key=/var/vcap/jobs/jaeger-all-in-one/tls/reporter/grpc.key'
+    flags << '--reporter.grpc.tls.cert=/var/vcap/jobs/jaeger-all-in-one/tls/reporter/grpc.crt'
+    if_p('reporter.grpc.tls.server-name') do |server|
+      flags << "--reporter.grpc.tls.server-name=#{server}"
+    end
+    if_p('reporter.grpc.tls.ca') do |_|
+      flags << '--reporter.grpc.tls.ca=/var/vcap/jobs/jaeger-all-in-one/tls/reporter/grpc-ca.crt'
+    end
+  end.else do
+    flags << '--reporter.grpc.tls.enabled=false'
   end
 
   # Storage configuration
