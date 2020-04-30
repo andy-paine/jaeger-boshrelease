@@ -54,6 +54,7 @@
   # Storage configuration
   case p('span_storage_type')
   when 'memory'
+    flags << "--memory.max-traces=#{p('memory.max-traces')}"
   when 'badger'
     flags << "--badger.ephemeral=false"
     flags << "--badger.directory-key=/var/vcap/store/jaeger-all-in-one/keys"

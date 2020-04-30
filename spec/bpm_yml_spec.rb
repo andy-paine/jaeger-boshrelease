@@ -17,6 +17,14 @@ describe 'jaeger-all-in-one bpm.yml' do
     end
   end
 
+  describe 'memory storage type' do
+    it 'sets memory CLI flags' do
+      config = { 'span_storage_type' => 'memory', 'memory' => { 'max-traces' => 10 } }
+      args = get_process_from_bpm(YAML::load template.render(config))['args']
+      expect(args).to include '--memory.max-traces=10'
+    end
+  end
+
   describe 'badger storage type' do
     let(:config) { { 'span_storage_type' => 'badger' } }
     it 'creates additional volumes' do

@@ -16,6 +16,9 @@ properties:
   span_storage_type:
     description: "What span storage type to use. Supported values are: memory, badger, elasticsearch, cassandra"
     default: badger
+  memory.max-traces:
+    description: The maximum amount of traces to store in memory
+    default: 0
   badger.consistency:
     description: If all writes should be synced immediately to physical disk. This will impact write performance.
     default: false
