@@ -3,7 +3,13 @@
   flags = []
 
   # Collector directly mapped variables
-  ['collector.grpc-port', 'collector.http-port', 'collector.num-workers', 'collector.port', 'collector.queue-size', 'collector.queue-size-memory', 'collector.zipkin.http-port' ].each do |property|
+  [
+    'collector.grpc-port', 'collector.http-port', 'collector.num-workers', 'collector.port',
+    'collector.queue-size', 'collector.queue-size-memory', 'collector.zipkin.http-port',
+    'processor.jaeger-binary.server-host-port', 'processor.jaeger-binary.server-max-packet-size', 'processor.jaeger-binary.server-queue-size', 'processor.jaeger-binary.workers',
+    'processor.jaeger-compact.server-host-port', 'processor.jaeger-compact.server-max-packet-size', 'processor.jaeger-compact.server-queue-size', 'processor.jaeger-compact.workers',
+    'processor.zipkin-compact.server-host-port', 'processor.zipkin-compact.server-max-packet-size', 'processor.zipkin-compact.server-queue-size', 'processor.zipkin-compact.workers',
+  ].each do |property|
     flags << "--#{property}=#{p(property)}"
   end
 

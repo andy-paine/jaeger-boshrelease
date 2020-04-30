@@ -80,3 +80,39 @@ properties:
   collector.zipkin.http-port:
     description: The HTTP port for the Zipkin collector service e.g. 9411
     default: 0
+  processor.jaeger-binary.server-host-port:
+    description: host:port for the jaeger-binary UDP server
+    default: ":6832"
+  processor.jaeger-binary.server-max-packet-size:
+    description: Max packet size for the jaeger-binary UDP server
+    default: 65000
+  processor.jaeger-binary.server-queue-size:
+    description: Length of the queue for the jaeger-binary UDP server
+    default: 1000
+  processor.jaeger-binary.workers:
+    description: How many jaeger-binary workers the processor should run
+    default: 10
+  processor.jaeger-compact.server-host-port:
+    description: host:port for the jaeger-compact UDP server
+    default: ":6831"
+  processor.jaeger-compact.server-max-packet-size:
+    description: Max packet size for the jaeger-compact UDP server
+    default: 65000
+  processor.jaeger-compact.server-queue-size:
+    description: Length of the queue for the jaeger-compact UDP server
+    default: 1000
+  processor.jaeger-compact.workers:
+    description: How many jaeger-compact workers the processor should run
+    default: 10
+  processor.zipkin-compact.server-host-port:
+    description: host:port for the zipkin-compact UDP server
+    default: ":5775"
+  processor.zipkin-compact.server-max-packet-size:
+    description: Max packet size for the zipkin-compact UDP server
+    default: 65000
+  processor.zipkin-compact.server-queue-size:
+    description: Length of the queue for the zipkin-compact UDP server
+    default: 1000
+  processor.zipkin-compact.workers:
+    description: How many zipkin-compact workers the processor should run
+    default: 10
