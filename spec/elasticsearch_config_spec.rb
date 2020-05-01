@@ -12,8 +12,13 @@ describe 'jaeger-all-in-one bpm.yml' do
 
 
   describe 'elasticsearch storage type' do
+    let(:config) {
+      {
+        'span_storage_type' => 'elasticsearch',
+        'es' => { 'server-urls' => ['http://10.0.0.1:9200', 'http://10.0.0.2:9200'] }
+      }
+    }
     it 'sets sensible defaults' do
-      config = { 'span_storage_type' => 'elasticsearch' }
       args = get_process_from_bpm(YAML::load template.render(config))['args']
       expect(args).to include '--es.bulk.actions=1000'
       expect(args).to include '--es.bulk.flush-interval=200ms'
@@ -30,10 +35,10 @@ describe 'jaeger-all-in-one bpm.yml' do
       expect(args).to include '--es.tls.enabled=false'
       expect(args).to include '--es.tls.skip-host-verify=false'
       expect(args).to include '--es.use-aliases=false'
+      expect(args).to include "--es.server-urls='http://10.0.0.1:9200,http://10.0.0.2:9200'"
 
       expect(args).to_not include '--es.index-prefix'
       expect(args).to_not include '--es.password'
-      expect(args).to_not include '--es.server-urls'
       expect(args).to_not include '--es.tags-as-fields.config-file'
       expect(args).to_not include '--es.tags-as-fields.dot-replacement'
       expect(args).to_not include '--es.tls.ca'
@@ -43,6 +48,46 @@ describe 'jaeger-all-in-one bpm.yml' do
       expect(args).to_not include '--es.token-file'
       expect(args).to_not include '--es.username'
       expect(args).to_not include '--es.version'
+    end
+
+    it 'includes optional properties when specified' do
+      config['es']['index-prefix'] = 'foo'
+      config['es']['tags-as-fields'] = { 'dot-replacement' => '_' }
+      config['es']['tls'] = { 'server-name' => 'node-1.elasticsearch.cluster' }
+      config['es']['version'] = 7
+      args = get_process_from_bpm(YAML::load template.render(config))['args']
+      expect(args).to include '--es.index-prefix=foo'
+      expect(args).to include '--es.tags-as-fields.dot-replacement=_'
+      expect(args).to include '--es.tls.server-name=node-1.elasticsearch.cluster'
+      expect(args).to include '--es.version=7'
+    end
+
+    it 'includes tls options when specified' do
+      config['es']['tls'] = {
+        'ca' => '--- BEGIN CERT ---',
+        'certificate' => '--- BEGIN CERT ---',
+        'private_key' => '--- BEGIN KEY ---',
+      }
+      args = get_process_from_bpm(YAML::load template.render(config))['args']
+      expect(args).to include '--es.tls.ca=/var/vcap/jobs/jaeger-all-in-one/tls/es.tls.ca.pem'
+      expect(args).to include '--es.tls.cert=/var/vcap/jobs/jaeger-all-in-one/tls/es.tls.cert.pem'
+      expect(args).to include '--es.tls.key=/var/vcap/jobs/jaeger-all-in-one/tls/es.tls.key.pem'
+    end
+
+    it 'includes basic auth options when specified' do
+      config['es']['username'] = 'test-user'
+      config['es']['password'] = 'Password123'
+      args = get_process_from_bpm(YAML::load template.render(config))['args']
+      expect(args).to include "--es.username='test-user'"
+      expect(args).to include "--es.password='Password123'"
+    end
+
+    it 'include config file options when specified' do
+      config['es']['tags-as-fields'] = { 'tags' => ['foo', 'bar'] }
+      config['es']['token-file'] = 'testtoken'
+      args = get_process_from_bpm(YAML::load template.render(config))['args']
+      expect(args).to include "--es.tags-as-fields.config-file=/var/vcap/jobs/jaeger-all-in-one/config/es/tags-as-fields.txt"
+      expect(args).to include "--es.token-file=/var/vcap/jobs/jaeger-all-in-one/config/es/token.txt"
     end
   end
 end

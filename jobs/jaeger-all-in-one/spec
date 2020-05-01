@@ -7,6 +7,8 @@ templates:
   config/bpm.yml.erb: config/bpm.yml
   config/ui.json.erb: config/ui.json
   config/sampling-strategies.json.erb: config/sampling-strategies.json
+  config/es/tags-as-fields.txt.erb: config/es/tags-as-fields.txt
+  config/es/token.txt.erb: config/es/token.txt
   tls/collector/grpc.key.erb: tls/collector/grpc.key
   tls/collector/grpc.crt.erb: tls/collector/grpc.crt
   tls/collector/grpc-client-ca.crt.erb: tls/collector/grpc-client-ca.crt
@@ -234,8 +236,10 @@ properties:
   es.tags-as-fields.all:
     description: (experimental) Store all span and process tags as object fields. If true .tags-as-fields.config-file is ignored. Binary tags are always stored as nested objects.
     default: false
-  es.tags-as-fields.config-file:
-    description: (experimental) Contents of file containing tag keys which will be stored as object fields. Each key should be on a separate line.
+  es.tags-as-fields.tags:
+    description: (experimental) List of tag keys which will be stored as object fields.
+    example:
+    - env
   es.tags-as-fields.dot-replacement:
     description: '(experimental) The character used to replace dots (".") in tag keys stored as object fields.'
   es.timeout:
@@ -246,12 +250,12 @@ properties:
     example: |
       -----BEGIN CERTIFICATE-----
       etc.
-  es.tls.cert:
+  es.tls.certificate:
     description: Contents of a TLS Certificate file, used to identify this process to the remote server(s)
     example: |
       -----BEGIN CERTIFICATE-----
       etc.
-  es.tls.key:
+  es.tls.private_key:
     description: Contents of a TLS Private Key file, used to identify this process to the remote server(s)
     default:
     example: |

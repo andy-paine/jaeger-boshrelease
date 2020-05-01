@@ -107,6 +107,37 @@
     ].each do |property|
       flags << "--#{property}=#{p(property)}"
     end
+    [
+      'es.index-prefix',
+      'es.tags-as-fields.dot-replacement',
+      'es.tls.server-name',
+      'es.version'
+    ].each do |property|
+      if_p(property) do |property_value|
+        flags << "--#{property}=#{property_value}"
+      end
+    end
+    flags << "--es.server-urls='#{p('es.server-urls').join(',')}'"
+
+    if_p('es.username', 'es.password') do |username,password|
+      flags << "--es.username='#{username}'"
+      flags << "--es.password='#{password}'"
+    end
+    if_p('es.tls.ca') do |_|
+      flags << '--es.tls.ca=/var/vcap/jobs/jaeger-all-in-one/tls/es.tls.ca.pem'
+    end
+    if_p('es.tls.certificate') do |_|
+      flags << '--es.tls.cert=/var/vcap/jobs/jaeger-all-in-one/tls/es.tls.cert.pem'
+    end
+    if_p('es.tls.private_key') do |_|
+      flags << '--es.tls.key=/var/vcap/jobs/jaeger-all-in-one/tls/es.tls.key.pem'
+    end
+    if_p('es.token-file') do |_|
+      flags << '--es.token-file=/var/vcap/jobs/jaeger-all-in-one/config/es/token.txt'
+    end
+    if_p('es.tags-as-fields.tags') do |_|
+      flags << '--es.tags-as-fields.config-file=/var/vcap/jobs/jaeger-all-in-one/config/es/tags-as-fields.txt'
+    end
   else
     raise "Only ['memory', 'badger', 'elasticsearch'] are supported values for span_storage_type, not: #{p('span_storage_type')}"
   end
