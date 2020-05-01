@@ -118,8 +118,7 @@
       end
     end
     if_link('elasticsearch') do |es_link|
-      es_addresses = es_link.instances.map { |es| "http://#{es.address}:#{es_link.p('elasticsearch.port')}"}.join ','
-      flags << "--es.server-urls=#{es_addresses}"
+      flags << "--es.server-urls=http://#{es_link.address}:#{es_link.p('elasticsearch.port')}"
     end.else do
       flags << "--es.server-urls=#{p('es.server-urls').join(',')}"
     end
