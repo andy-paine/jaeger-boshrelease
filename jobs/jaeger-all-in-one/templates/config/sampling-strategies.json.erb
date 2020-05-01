@@ -1,0 +1,5 @@
+<%- if_p('sampling.strategies-file') do |config|
+  require 'json'
+-%>
+<%= config.to_json -%>
+<%- end -%>

@@ -4,6 +4,9 @@
 
   # Collector directly mapped variables
   [
+    'admin-http-port', 'downsampling.ratio', 'http-server.host-port', 'log-level',
+    'metrics-backend', 'metrics-http-route',
+    'query.base-path', 'query.bearer-token-propagation', 'query.port',
     'collector.grpc-port', 'collector.http-port', 'collector.num-workers', 'collector.port',
     'collector.queue-size', 'collector.queue-size-memory', 'collector.zipkin.http-port',
     'processor.jaeger-binary.server-host-port', 'processor.jaeger-binary.server-max-packet-size', 'processor.jaeger-binary.server-queue-size', 'processor.jaeger-binary.workers',
@@ -12,6 +15,28 @@
     'reporter.grpc.discovery.min-peers', 'reporter.grpc.retry.max', 'reporter.grpc.tls.skip-host-verify',
   ].each do |property|
     flags << "--#{property}=#{p(property)}"
+  end
+
+  if_p('downsampling.hashsalt') do |hashsalt|
+    flags << "--downsampling.hashsalt=#{hashsalt}"
+  end
+
+  if_p('query.static-files') do |static_files_dir|
+    flags << "--query.static-files=#{static_files_dir}"
+  end
+
+  if_p('query.additional-headers') do |additional_headers|
+    additional_headers.each do |header|
+      flags << "--query.additional-headers='#{header}'"
+    end
+  end
+
+  if_p('query.ui-config') do |_|
+    flags << '--query.ui-config=/var/vcap/jobs/jaeger-all-in-one/config/ui.json'
+  end
+
+  if_p('sampling.strategies-file') do |_|
+    flags << '--sampling.strategies-file=/var/vcap/jobs/jaeger-all-in-one/config/sampling-strategies.json'
   end
 
   # Collector formatted collections

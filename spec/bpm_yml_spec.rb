@@ -48,7 +48,7 @@ describe 'jaeger-all-in-one bpm.yml' do
   end
 
   describe 'collector configuration' do
-    it 'should set sensible defaults for collector configuration' do
+    it 'should set sensible defaults' do
       args = get_process_from_bpm(YAML::load template.render({}))['args']
       expect(args).to include '--collector.grpc-port=14250'
       expect(args).to include '--collector.grpc.tls.enabled=false'
@@ -96,7 +96,7 @@ describe 'jaeger-all-in-one bpm.yml' do
   end
 
   describe 'processor configuration' do
-    it 'should set sensible defaults for processor configuration' do
+    it 'should set sensible defaults' do
       args = get_process_from_bpm(YAML::load template.render({}))['args']
       expect(args).to include '--processor.jaeger-binary.server-host-port=:6832'
       expect(args).to include '--processor.jaeger-binary.server-max-packet-size=65000'
@@ -114,7 +114,7 @@ describe 'jaeger-all-in-one bpm.yml' do
   end
 
   describe 'reporter configuration' do
-    it 'should set sensible defaults for reporter configuration' do
+    it 'should set sensible defaults' do
       args = get_process_from_bpm(YAML::load template.render({}))['args']
       expect(args).to include '--reporter.grpc.discovery.min-peers=3'
       expect(args).to include '--reporter.grpc.retry.max=3'
@@ -155,6 +155,55 @@ describe 'jaeger-all-in-one bpm.yml' do
       config = { 'reporter' => { 'grpc' => { 'host-port' => ['host1:port1', 'host2:port2'] }}}
       args = get_process_from_bpm(YAML::load template.render(config))['args']
       expect(args).to include "--reporter.grpc.host-port='host1:port1,host2:port2'"
+    end
+  end
+
+  describe 'other configuration' do
+    it 'should set sensible defaults' do
+      args = get_process_from_bpm(YAML::load template.render({}))['args']
+      expect(args).to include '--admin-http-port=14269'
+      expect(args).to include '--downsampling.ratio=1.0'
+      expect(args).to include '--http-server.host-port=:5778'
+      expect(args).to include '--log-level=info'
+      expect(args).to include '--metrics-backend=prometheus'
+      expect(args).to include '--metrics-http-route=/metrics'
+      expect(args).to include '--query.base-path=/'
+      expect(args).to include '--query.bearer-token-propagation=false'
+      expect(args).to include '--query.port=16686'
+
+      expect(args).to_not include '--downsampling.hashsalt'
+      expect(args).to_not include '--query.additional-headers'
+      expect(args).to_not include '--query.static-files'
+      expect(args).to_not include '--query.ui-config'
+      expect(args).to_not include '--sampling.strategies-file'
+    end
+
+    it 'should include downsampling hashsalt when provided' do
+      config = { 'downsampling' => { 'hashsalt' => 'foo' }}
+      args = get_process_from_bpm(YAML::load template.render(config))['args']
+      expect(args).to include '--downsampling.hashsalt=foo'
+    end
+
+    it 'should include optional query parameters when provided' do
+      config = { 'query' => { 'additional-headers' => ['Header: One', 'Header: Two'], 'static-files' => '/foo' }}
+      rendered = template.render(config)
+      args = get_process_from_bpm(YAML::load rendered)['args']
+      expect(args).to include "--query.static-files=/foo"
+      # YAML::load is causing some marshalling issues so check the raw outputted file is correct
+      expect(rendered).to include "--query.additional-headers='Header: One'"
+      expect(rendered).to include "--query.additional-headers='Header: Two'"
+    end
+
+    it 'should include ui config when content is provided' do
+      config = { 'query' => { 'ui-config' => '{ "some": "json" }' }}
+      args = get_process_from_bpm(YAML::load template.render(config))['args']
+      expect(args).to include '--query.ui-config=/var/vcap/jobs/jaeger-all-in-one/config/ui.json'
+    end
+
+    it 'should include sampling strategies when content is provided' do
+      config = { 'sampling' => { 'strategies-file' => '{ "some": "json" }' }}
+      args = get_process_from_bpm(YAML::load template.render(config))['args']
+      expect(args).to include '--sampling.strategies-file=/var/vcap/jobs/jaeger-all-in-one/config/sampling-strategies.json'
     end
   end
 end
