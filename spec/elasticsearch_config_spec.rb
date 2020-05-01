@@ -35,7 +35,7 @@ describe 'jaeger-all-in-one bpm.yml' do
       expect(args).to include '--es.tls.enabled=false'
       expect(args).to include '--es.tls.skip-host-verify=false'
       expect(args).to include '--es.use-aliases=false'
-      expect(args).to include "--es.server-urls='http://10.0.0.1:9200,http://10.0.0.2:9200'"
+      expect(args).to include '--es.server-urls=http://10.0.0.1:9200,http://10.0.0.2:9200'
 
       expect(args).to_not include '--es.index-prefix'
       expect(args).to_not include '--es.password'
@@ -78,16 +78,16 @@ describe 'jaeger-all-in-one bpm.yml' do
       config['es']['username'] = 'test-user'
       config['es']['password'] = 'Password123'
       args = get_process_from_bpm(YAML::load template.render(config))['args']
-      expect(args).to include "--es.username='test-user'"
-      expect(args).to include "--es.password='Password123'"
+      expect(args).to include '--es.username=test-user'
+      expect(args).to include '--es.password=Password123'
     end
 
     it 'include config file options when specified' do
       config['es']['tags-as-fields'] = { 'tags' => ['foo', 'bar'] }
       config['es']['token-file'] = 'testtoken'
       args = get_process_from_bpm(YAML::load template.render(config))['args']
-      expect(args).to include "--es.tags-as-fields.config-file=/var/vcap/jobs/jaeger-all-in-one/config/es/tags-as-fields.txt"
-      expect(args).to include "--es.token-file=/var/vcap/jobs/jaeger-all-in-one/config/es/token.txt"
+      expect(args).to include '--es.tags-as-fields.config-file=/var/vcap/jobs/jaeger-all-in-one/config/es/tags-as-fields.txt'
+      expect(args).to include '--es.token-file=/var/vcap/jobs/jaeger-all-in-one/config/es/token.txt'
     end
 
     it 'uses a BOSH link where available' do
@@ -102,7 +102,7 @@ describe 'jaeger-all-in-one bpm.yml' do
       )
       rendered = template.render({'span_storage_type' => 'elasticsearch'}, consumes: [es_link])
       args = get_process_from_bpm(YAML::load rendered)['args']
-      expect(args).to include "--es.server-urls='http://es-node-1:9999,http://es-node-2:9999,http://es-node-3:9999'"
+      expect(args).to include '--es.server-urls=http://es-node-1:9999,http://es-node-2:9999,http://es-node-3:9999'
     end
   end
 end

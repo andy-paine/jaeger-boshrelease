@@ -58,8 +58,8 @@ describe 'jaeger-all-in-one bpm.yml' do
       expect(args).to include '--collector.queue-size=2000'
       expect(args).to include '--collector.queue-size-memory=0'
       expect(args).to include '--collector.zipkin.http-port=0'
-      expect(args).to include "--collector.zipkin.allowed-headers='content-type'"
-      expect(args).to include "--collector.zipkin.allowed-origins='*'"
+      expect(args).to include '--collector.zipkin.allowed-headers=content-type'
+      expect(args).to include '--collector.zipkin.allowed-origins=*'
 
       expect(args).to_not include '--collector.tags'
       expect(args).to_not include '--collector.grpc.tls.cert'
@@ -84,14 +84,14 @@ describe 'jaeger-all-in-one bpm.yml' do
     it 'should include tags as a comma separated list of key=value' do
       config = { 'collector' => { 'tags' => { 'key1' => 'value1', 'key2' => 'value2' }}}
       args = get_process_from_bpm(YAML::load template.render(config))['args']
-      expect(args).to include "--collector.tags='key1=value1,key2=value2'"
+      expect(args).to include '--collector.tags=key1=value1,key2=value2'
     end
 
     it 'should provide zipkin options as comma separated lists' do
       config = { 'collector' => { 'zipkin' => { 'allowed-headers' => ['header1', 'header2'], 'allowed-origins' => ['origin1', 'origin2'] }}}
       args = get_process_from_bpm(YAML::load template.render(config))['args']
-      expect(args).to include "--collector.zipkin.allowed-headers='header1,header2'"
-      expect(args).to include "--collector.zipkin.allowed-origins='origin1,origin2'"
+      expect(args).to include '--collector.zipkin.allowed-headers=header1,header2'
+      expect(args).to include '--collector.zipkin.allowed-origins=origin1,origin2'
     end
   end
 
@@ -154,7 +154,7 @@ describe 'jaeger-all-in-one bpm.yml' do
     it 'should provide grpc host-ports as comma separated list' do
       config = { 'reporter' => { 'grpc' => { 'host-port' => ['host1:port1', 'host2:port2'] }}}
       args = get_process_from_bpm(YAML::load template.render(config))['args']
-      expect(args).to include "--reporter.grpc.host-port='host1:port1,host2:port2'"
+      expect(args).to include '--reporter.grpc.host-port=host1:port1,host2:port2'
     end
   end
 
@@ -188,10 +188,10 @@ describe 'jaeger-all-in-one bpm.yml' do
       config = { 'query' => { 'additional-headers' => ['Header: One', 'Header: Two'], 'static-files' => '/foo' }}
       rendered = template.render(config)
       args = get_process_from_bpm(YAML::load rendered)['args']
-      expect(args).to include "--query.static-files=/foo"
+      expect(args).to include '--query.static-files=/foo'
       # YAML::load is causing some marshalling issues so check the raw outputted file is correct
-      expect(rendered).to include "--query.additional-headers='Header: One'"
-      expect(rendered).to include "--query.additional-headers='Header: Two'"
+      expect(rendered).to include '--query.additional-headers="Header: One"'
+      expect(rendered).to include '--query.additional-headers="Header: Two"'
     end
 
     it 'should include ui config when content is provided' do

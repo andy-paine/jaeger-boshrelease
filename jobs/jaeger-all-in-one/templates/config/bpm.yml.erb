@@ -27,7 +27,7 @@
 
   if_p('query.additional-headers') do |additional_headers|
     additional_headers.each do |header|
-      flags << "--query.additional-headers='#{header}'"
+      flags << "--query.additional-headers=\"#{header}\""
     end
   end
 
@@ -40,11 +40,11 @@
   end
 
   # Collector formatted collections
-  flags << "--collector.zipkin.allowed-headers='#{p('collector.zipkin.allowed-headers').join(',')}'"
-  flags << "--collector.zipkin.allowed-origins='#{p('collector.zipkin.allowed-origins').join(',')}'"
+  flags << "--collector.zipkin.allowed-headers=#{p('collector.zipkin.allowed-headers').join(',')}"
+  flags << "--collector.zipkin.allowed-origins=#{p('collector.zipkin.allowed-origins').join(',')}"
   if_p('collector.tags') do |tags|
     formatted_tags = tags.map { |key,value| "#{key}=#{value}" }.join(',')
-    flags << "--collector.tags='#{formatted_tags}'"
+    flags << "--collector.tags=#{formatted_tags}"
   end
 
   # Collector TLS configuration
@@ -60,7 +60,7 @@
   end
 
   if_p('reporter.grpc.host-port') do |host_port|
-    flags << "--reporter.grpc.host-port='#{p('reporter.grpc.host-port').join(',')}'"
+    flags << "--reporter.grpc.host-port=#{p('reporter.grpc.host-port').join(',')}"
   end
   if_p('reporter.grpc.tls.private_key', 'reporter.grpc.tls.certificate') do |key,cert|
     flags << '--reporter.grpc.tls.enabled=true'
@@ -119,14 +119,14 @@
     end
     if_link('elasticsearch') do |es_link|
       es_addresses = es_link.instances.map { |es| "http://#{es.address}:#{es_link.p('elasticsearch.port')}"}.join ','
-      flags << "--es.server-urls='#{es_addresses}'"
+      flags << "--es.server-urls=#{es_addresses}"
     end.else do
-      flags << "--es.server-urls='#{p('es.server-urls').join(',')}'"
+      flags << "--es.server-urls=#{p('es.server-urls').join(',')}"
     end
 
     if_p('es.username', 'es.password') do |username,password|
-      flags << "--es.username='#{username}'"
-      flags << "--es.password='#{password}'"
+      flags << "--es.username=#{username}"
+      flags << "--es.password=#{password}"
     end
     if_p('es.tls.ca') do |_|
       flags << '--es.tls.ca=/var/vcap/jobs/jaeger-all-in-one/tls/es.tls.ca.pem'
