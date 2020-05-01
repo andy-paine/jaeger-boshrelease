@@ -16,6 +16,10 @@ templates:
   tls/reporter/grpc.crt.erb: tls/reporter/grpc.crt
   tls/reporter/grpc-ca.crt.erb: tls/reporter/grpc-ca.crt
 
+consumes:
+- name: elasticsearch
+  type: elasticsearch
+
 properties:
   admin-http-port:
     description: The http port for the admin server, including health check, /metrics, etc.

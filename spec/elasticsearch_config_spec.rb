@@ -89,5 +89,20 @@ describe 'jaeger-all-in-one bpm.yml' do
       expect(args).to include "--es.tags-as-fields.config-file=/var/vcap/jobs/jaeger-all-in-one/config/es/tags-as-fields.txt"
       expect(args).to include "--es.token-file=/var/vcap/jobs/jaeger-all-in-one/config/es/token.txt"
     end
+
+    it 'uses a BOSH link where available' do
+      es_link = Bosh::Template::Test::Link.new(
+        name: 'elasticsearch',
+        instances: (1..3).map { |i| Bosh::Template::Test::LinkInstance.new(address: "es-node-#{i}")},
+        properties: {
+          'elasticsearch' => {
+            'port' => 9999
+          }
+        }
+      )
+      rendered = template.render({'span_storage_type' => 'elasticsearch'}, consumes: [es_link])
+      args = get_process_from_bpm(YAML::load rendered)['args']
+      expect(args).to include "--es.server-urls='http://es-node-1:9999,http://es-node-2:9999,http://es-node-3:9999'"
+    end
   end
 end

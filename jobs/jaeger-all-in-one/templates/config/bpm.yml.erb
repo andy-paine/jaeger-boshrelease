@@ -117,7 +117,12 @@
         flags << "--#{property}=#{property_value}"
       end
     end
-    flags << "--es.server-urls='#{p('es.server-urls').join(',')}'"
+    if_link('elasticsearch') do |es_link|
+      es_addresses = es_link.instances.map { |es| "http://#{es.address}:#{es_link.p('elasticsearch.port')}"}.join ','
+      flags << "--es.server-urls='#{es_addresses}'"
+    end.else do
+      flags << "--es.server-urls='#{p('es.server-urls').join(',')}'"
+    end
 
     if_p('es.username', 'es.password') do |username,password|
       flags << "--es.username='#{username}'"
