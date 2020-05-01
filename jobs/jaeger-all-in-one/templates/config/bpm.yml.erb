@@ -64,13 +64,13 @@
   end
   if_p('reporter.grpc.tls.private_key', 'reporter.grpc.tls.certificate') do |key,cert|
     flags << '--reporter.grpc.tls.enabled=true'
-    flags << '--reporter.grpc.tls.key=/var/vcap/jobs/jaeger-all-in-one/tls/reporter/grpc.key'
-    flags << '--reporter.grpc.tls.cert=/var/vcap/jobs/jaeger-all-in-one/tls/reporter/grpc.crt'
+    flags << '--reporter.grpc.tls.key=/var/vcap/jobs/jaeger-all-in-one/tls/reporter.grpc.tls.key.pem'
+    flags << '--reporter.grpc.tls.cert=/var/vcap/jobs/jaeger-all-in-one/tls/reporter.grpc.tls.cert.pem'
     if_p('reporter.grpc.tls.server-name') do |server|
       flags << "--reporter.grpc.tls.server-name=#{server}"
     end
     if_p('reporter.grpc.tls.ca') do |_|
-      flags << '--reporter.grpc.tls.ca=/var/vcap/jobs/jaeger-all-in-one/tls/reporter/grpc-ca.crt'
+      flags << '--reporter.grpc.tls.ca=/var/vcap/jobs/jaeger-all-in-one/tls/reporter.grpc.tls.ca.pem'
     end
   end.else do
     flags << '--reporter.grpc.tls.enabled=false'

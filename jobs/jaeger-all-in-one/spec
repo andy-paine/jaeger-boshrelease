@@ -12,9 +12,9 @@ templates:
   tls/collector.grpc.tls.key.pem.erb: tls/collector.grpc.tls.key.pem
   tls/collector.grpc.tls.cert.pem.erb: tls/collector.grpc.tls.cert.pem
   tls/collector.grpc.tls.client-ca.pem.erb: tls/collector.grpc.tls.client-ca.pem
-  tls/reporter/grpc.key.erb: tls/reporter/grpc.key
-  tls/reporter/grpc.crt.erb: tls/reporter/grpc.crt
-  tls/reporter/grpc-ca.crt.erb: tls/reporter/grpc-ca.crt
+  tls/reporter.grpc.tls.key.pem.erb: tls/reporter.grpc.tls.key.pem
+  tls/reporter.grpc.tls.cert.pem.erb: tls/reporter.grpc.tls.cert.pem
+  tls/reporter.grpc.tls.ca.pem.erb: tls/reporter.grpc.tls.ca.pem
   tls/es.tls.key.pem.erb: tls/es.tls.key.pem
   tls/es.tls.cert.pem.erb: tls/es.tls.cert.pem
   tls/es.tls.ca.pem.erb: tls/es.tls.ca.pem
