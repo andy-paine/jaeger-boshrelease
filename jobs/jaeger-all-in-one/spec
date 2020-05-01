@@ -9,9 +9,9 @@ templates:
   config/sampling-strategies.json.erb: config/sampling-strategies.json
   config/es/tags-as-fields.txt.erb: config/es/tags-as-fields.txt
   config/es/token.txt.erb: config/es/token.txt
-  tls/collector/grpc.key.erb: tls/collector/grpc.key
-  tls/collector/grpc.crt.erb: tls/collector/grpc.crt
-  tls/collector/grpc-client-ca.crt.erb: tls/collector/grpc-client-ca.crt
+  tls/collector.grpc.tls.key.pem.erb: tls/collector.grpc.tls.key.pem
+  tls/collector.grpc.tls.cert.pem.erb: tls/collector.grpc.tls.cert.pem
+  tls/collector.grpc.tls.client-ca.pem.erb: tls/collector.grpc.tls.client-ca.pem
   tls/reporter/grpc.key.erb: tls/reporter/grpc.key
   tls/reporter/grpc.crt.erb: tls/reporter/grpc.crt
   tls/reporter/grpc-ca.crt.erb: tls/reporter/grpc-ca.crt
