@@ -10,7 +10,6 @@ describe 'jaeger-all-in-one bpm.yml' do
   let(:job) { release.job('jaeger-all-in-one') }
   let(:template) { job.template('config/bpm.yml') }
 
-
   describe 'elasticsearch storage type' do
     let(:config) {
       {
@@ -103,6 +102,50 @@ describe 'jaeger-all-in-one bpm.yml' do
       rendered = template.render({'span_storage_type' => 'elasticsearch'}, consumes: [es_link])
       args = get_process_from_bpm(YAML::load rendered)['args']
       expect(args).to include '--es.server-urls=http://elasticsearch.cluster:9999'
+    end
+  end
+end
+
+describe 'jaeger-all-in-one elasticsearch tls configuration' do
+  let(:release) { Bosh::Template::Test::ReleaseDir.new(File.join(File.dirname(__FILE__), '../')) }
+  let(:job) { release.job('jaeger-all-in-one') }
+
+  describe 'private key file' do
+    let(:template) { job.template('tls/es.tls.key.pem') }
+
+    it 'creates an empty file when no private key is provided' do
+      expect(template.render({})).to eq('')
+    end
+
+    it 'populates the key file with the private key provided' do
+      config = { 'es' => { 'tls' => { 'private_key' => '--- BEGIN KEY ---'}}}
+      expect(template.render(config)).to eq('--- BEGIN KEY ---')
+    end
+  end
+
+  describe 'certificate file' do
+    let(:template) { job.template('tls/es.tls.cert.pem') }
+
+    it 'creates an empty file when no certificate is provided' do
+      expect(template.render({})).to eq('')
+    end
+
+    it 'populates the key file with the certificate provided' do
+      config = { 'es' => { 'tls' => { 'certificate' => '--- BEGIN CERT ---'}}}
+      expect(template.render(config)).to eq('--- BEGIN CERT ---')
+    end
+  end
+
+  describe 'ca file' do
+    let(:template) { job.template('tls/es.tls.ca.pem') }
+
+    it 'creates an empty file when no ca is provided' do
+      expect(template.render({})).to eq('')
+    end
+
+    it 'populates the key file with the ca provided' do
+      config = { 'es' => { 'tls' => { 'ca' => '--- BEGIN CERT ---'}}}
+      expect(template.render(config)).to eq('--- BEGIN CERT ---')
     end
   end
 end
