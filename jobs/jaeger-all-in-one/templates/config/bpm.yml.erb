@@ -1,166 +1,196 @@
 <%-
   require 'yaml'
-  flags = []
+  job_name = p('job-name')
+  job_dir = "/var/vcap/jobs/#{job_name}"
+  :collector
+  :query
+  :processor
+  :storage
 
-  # Collector directly mapped variables
-  [
-    'admin-http-port', 'downsampling.ratio', 'http-server.host-port', 'log-level',
-    'metrics-backend', 'metrics-http-route',
-    'query.base-path', 'query.bearer-token-propagation', 'query.port',
-    'collector.grpc-port', 'collector.http-port', 'collector.num-workers', 'collector.port',
-    'collector.queue-size', 'collector.queue-size-memory', 'collector.zipkin.http-port',
-    'processor.jaeger-binary.server-host-port', 'processor.jaeger-binary.server-max-packet-size', 'processor.jaeger-binary.server-queue-size', 'processor.jaeger-binary.workers',
-    'processor.jaeger-compact.server-host-port', 'processor.jaeger-compact.server-max-packet-size', 'processor.jaeger-compact.server-queue-size', 'processor.jaeger-compact.workers',
-    'processor.zipkin-compact.server-host-port', 'processor.zipkin-compact.server-max-packet-size', 'processor.zipkin-compact.server-queue-size', 'processor.zipkin-compact.workers',
-    'reporter.grpc.discovery.min-peers', 'reporter.grpc.retry.max', 'reporter.grpc.tls.skip-host-verify',
-  ].each do |property|
-    flags << "--#{property}=#{p(property)}"
+  def to_flags(properties)
+    properties.map do |property| "--#{property}=#{p(property)}" end
   end
 
+
+  required_flags = case job_name
+  when 'jaeger-all-in-one'
+    [:collector, :query, :processor, :storage]
+  when 'jaeger-collector'
+    [:collector, :storage]
+  end
+
+  # COMMON
+  flags = to_flags [
+    'admin-http-port', 'downsampling.ratio', 'http-server.host-port', 'log-level',
+    'metrics-backend', 'metrics-http-route',
+  ]
   if_p('downsampling.hashsalt') do |hashsalt|
     flags << "--downsampling.hashsalt=#{hashsalt}"
   end
 
-  if_p('query.static-files') do |static_files_dir|
-    flags << "--query.static-files=#{static_files_dir}"
-  end
+  # COLLECTOR
+  if required_flags.include? :collector
+    flags += to_flags [
+      'collector.grpc-port', 'collector.http-port', 'collector.num-workers', 'collector.port',
+      'collector.queue-size', 'collector.queue-size-memory', 'collector.zipkin.http-port',
+    ]
+    if_p('sampling.strategies-file') do |_|
+      flags << "--sampling.strategies-file=#{job_dir}/config/sampling-strategies.json"
+    end
 
-  if_p('query.additional-headers') do |additional_headers|
-    additional_headers.each do |header|
-      flags << "--query.additional-headers=\"#{header}\""
+    flags << "--collector.zipkin.allowed-headers=#{p('collector.zipkin.allowed-headers').join(',')}"
+    flags << "--collector.zipkin.allowed-origins=#{p('collector.zipkin.allowed-origins').join(',')}"
+    if_p('collector.tags') do |tags|
+      formatted_tags = tags.map { |key,value| "#{key}=#{value}" }.join(',')
+      flags << "--collector.tags=#{formatted_tags}"
+    end
+    if_p('collector.grpc.tls.private_key', 'collector.grpc.tls.certificate') do |key, cert|
+      flags << '--collector.grpc.tls.enabled=true'
+      flags << "--collector.grpc.tls.key=#{job_dir}/tls/collector.grpc.tls.key.pem"
+      flags << "--collector.grpc.tls.cert=#{job_dir}/tls/collector.grpc.tls.cert.pem"
+    end.else do
+      flags << '--collector.grpc.tls.enabled=false'
+    end
+    if_p('collector.grpc.tls.client-ca') do |_|
+      flags << "--collector.grpc.tls.client-ca=#{job_dir}/tls/collector.grpc.tls.client-ca.pem"
     end
   end
 
-  if_p('query.ui-config') do |_|
-    flags << '--query.ui-config=/var/vcap/jobs/jaeger-all-in-one/config/ui.json'
-  end
-
-  if_p('sampling.strategies-file') do |_|
-    flags << '--sampling.strategies-file=/var/vcap/jobs/jaeger-all-in-one/config/sampling-strategies.json'
-  end
-
-  # Collector formatted collections
-  flags << "--collector.zipkin.allowed-headers=#{p('collector.zipkin.allowed-headers').join(',')}"
-  flags << "--collector.zipkin.allowed-origins=#{p('collector.zipkin.allowed-origins').join(',')}"
-  if_p('collector.tags') do |tags|
-    formatted_tags = tags.map { |key,value| "#{key}=#{value}" }.join(',')
-    flags << "--collector.tags=#{formatted_tags}"
-  end
-
-  # Collector TLS configuration
-  if_p('collector.grpc.tls.private_key', 'collector.grpc.tls.certificate') do |key, cert|
-    flags << '--collector.grpc.tls.enabled=true'
-    flags << '--collector.grpc.tls.key=/var/vcap/jobs/jaeger-all-in-one/tls/collector.grpc.tls.key.pem'
-    flags << '--collector.grpc.tls.cert=/var/vcap/jobs/jaeger-all-in-one/tls/collector.grpc.tls.cert.pem'
-  end.else do
-    flags << '--collector.grpc.tls.enabled=false'
-  end
-  if_p('collector.grpc.tls.client-ca') do |_|
-    flags << '--collector.grpc.tls.client-ca=/var/vcap/jobs/jaeger-all-in-one/tls/collector.grpc.tls.client-ca.pem'
-  end
-
-  if_p('reporter.grpc.host-port') do |host_port|
-    flags << "--reporter.grpc.host-port=#{p('reporter.grpc.host-port').join(',')}"
-  end
-  if_p('reporter.grpc.tls.private_key', 'reporter.grpc.tls.certificate') do |key,cert|
-    flags << '--reporter.grpc.tls.enabled=true'
-    flags << '--reporter.grpc.tls.key=/var/vcap/jobs/jaeger-all-in-one/tls/reporter.grpc.tls.key.pem'
-    flags << '--reporter.grpc.tls.cert=/var/vcap/jobs/jaeger-all-in-one/tls/reporter.grpc.tls.cert.pem'
-    if_p('reporter.grpc.tls.server-name') do |server|
-      flags << "--reporter.grpc.tls.server-name=#{server}"
+  # QUERY
+  if required_flags.include? :query
+    flags += to_flags [
+      'query.base-path', 'query.bearer-token-propagation', 'query.port',
+    ]
+    if_p('query.static-files') do |static_files_dir|
+      flags << "--query.static-files=#{static_files_dir}"
     end
-    if_p('reporter.grpc.tls.ca') do |_|
-      flags << '--reporter.grpc.tls.ca=/var/vcap/jobs/jaeger-all-in-one/tls/reporter.grpc.tls.ca.pem'
-    end
-  end.else do
-    flags << '--reporter.grpc.tls.enabled=false'
-  end
-
-  # Storage configuration
-  case p('span_storage_type')
-  when 'memory'
-    flags << "--memory.max-traces=#{p('memory.max-traces')}"
-  when 'badger'
-    flags << "--badger.ephemeral=false"
-    flags << "--badger.directory-key=/var/vcap/store/jaeger-all-in-one/keys"
-    flags << "--badger.directory-value=/var/vcap/store/jaeger-all-in-one/values"
-    ['badger.consistency', 'badger.maintenance-interval', 'badger.metrics-update-interval', 'badger.read-only', 'badger.span-store-ttl', 'badger.truncate'].each do |property|
-      flags << "--#{property}=#{p(property)}"
-    end
-  when 'elasticsearch'
-    [
-      'es.bulk.actions',
-      'es.bulk.flush-interval',
-      'es.bulk.size',
-      'es.bulk.workers',
-      'es.create-index-templates',
-      'es.max-num-spans',
-      'es.max-span-age',
-      'es.num-replicas',
-      'es.num-shards',
-      'es.sniffer',
-      'es.tags-as-fields.all',
-      'es.timeout',
-      'es.tls.enabled',
-      'es.tls.skip-host-verify',
-      'es.use-aliases',
-    ].each do |property|
-      flags << "--#{property}=#{p(property)}"
-    end
-    [
-      'es.index-prefix',
-      'es.tags-as-fields.dot-replacement',
-      'es.tls.server-name',
-      'es.version'
-    ].each do |property|
-      if_p(property) do |property_value|
-        flags << "--#{property}=#{property_value}"
+    if_p('query.additional-headers') do |additional_headers|
+      additional_headers.each do |header|
+        flags << "--query.additional-headers=\"#{header}\""
       end
     end
-    if_link('elasticsearch') do |es_link|
-      flags << "--es.server-urls=http://#{es_link.address}:#{es_link.p('elasticsearch.port')}"
+    if_p('query.ui-config') do |_|
+      flags << "--query.ui-config=#{job_dir}/config/ui.json"
+    end
+  end
+
+  # PROCESSOR
+  if required_flags.include? :processor
+    flags += to_flags [
+      'processor.jaeger-binary.server-host-port', 'processor.jaeger-binary.server-max-packet-size', 'processor.jaeger-binary.server-queue-size', 'processor.jaeger-binary.workers',
+      'processor.jaeger-compact.server-host-port', 'processor.jaeger-compact.server-max-packet-size', 'processor.jaeger-compact.server-queue-size', 'processor.jaeger-compact.workers',
+      'processor.zipkin-compact.server-host-port', 'processor.zipkin-compact.server-max-packet-size', 'processor.zipkin-compact.server-queue-size', 'processor.zipkin-compact.workers',
+      'reporter.grpc.discovery.min-peers', 'reporter.grpc.retry.max', 'reporter.grpc.tls.skip-host-verify',
+    ]
+    if_p('reporter.grpc.host-port') do |host_port|
+      flags << "--reporter.grpc.host-port=#{p('reporter.grpc.host-port').join(',')}"
+    end
+    if_p('reporter.grpc.tls.private_key', 'reporter.grpc.tls.certificate') do |key,cert|
+      flags << '--reporter.grpc.tls.enabled=true'
+      flags << "--reporter.grpc.tls.key=#{job_dir}/tls/reporter.grpc.tls.key.pem"
+      flags << "--reporter.grpc.tls.cert=#{job_dir}/tls/reporter.grpc.tls.cert.pem"
+      if_p('reporter.grpc.tls.server-name') do |server|
+        flags << "--reporter.grpc.tls.server-name=#{server}"
+      end
+      if_p('reporter.grpc.tls.ca') do |_|
+        flags << "--reporter.grpc.tls.ca=#{job_dir}/tls/reporter.grpc.tls.ca.pem"
+      end
     end.else do
-      flags << "--es.server-urls=#{p('es.server-urls').join(',')}"
+      flags << '--reporter.grpc.tls.enabled=false'
+    end
+  end
+
+  # STORAGE
+  if required_flags.include? :storage
+    supported_storage_types = {
+      'jaeger-all-in-one' => ['memory', 'badger', 'elasticsearch'],
+      'jaeger-collector' => ['elasticsearch'],
+    }
+    unless supported_storage_types[job_name].include? p('span_storage_type')
+      raise "#{p('span_storage_type')} is not a supported span_storage_type for #{job_name}"
     end
 
-    if_p('es.username', 'es.password') do |username,password|
-      flags << "--es.username=#{username}"
-      flags << "--es.password=#{password}"
+    case p('span_storage_type')
+    when 'memory'
+      flags << "--memory.max-traces=#{p('memory.max-traces')}"
+    when 'badger'
+      flags << "--badger.ephemeral=false"
+      flags << "--badger.directory-key=/var/vcap/store/#{job_name}/keys"
+      flags << "--badger.directory-value=/var/vcap/store/#{job_name}/values"
+      ['badger.consistency', 'badger.maintenance-interval', 'badger.metrics-update-interval', 'badger.read-only', 'badger.span-store-ttl', 'badger.truncate'].each do |property|
+        flags << "--#{property}=#{p(property)}"
+      end
+    when 'elasticsearch'
+      [
+        'es.bulk.actions',
+        'es.bulk.flush-interval',
+        'es.bulk.size',
+        'es.bulk.workers',
+        'es.create-index-templates',
+        'es.max-num-spans',
+        'es.max-span-age',
+        'es.num-replicas',
+        'es.num-shards',
+        'es.sniffer',
+        'es.tags-as-fields.all',
+        'es.timeout',
+        'es.tls.enabled',
+        'es.tls.skip-host-verify',
+        'es.use-aliases',
+      ].each do |property|
+        flags << "--#{property}=#{p(property)}"
+      end
+      [
+        'es.index-prefix',
+        'es.tags-as-fields.dot-replacement',
+        'es.tls.server-name',
+        'es.version'
+      ].each do |property|
+        if_p(property) do |property_value|
+          flags << "--#{property}=#{property_value}"
+        end
+      end
+      if_link('elasticsearch') do |es_link|
+        flags << "--es.server-urls=http://#{es_link.address}:#{es_link.p('elasticsearch.port')}"
+      end.else do
+        flags << "--es.server-urls=#{p('es.server-urls').join(',')}"
+      end
+      if_p('es.username', 'es.password') do |username,password|
+        flags << "--es.username=#{username}"
+        flags << "--es.password=#{password}"
+      end
+      if_p('es.tls.ca') do |_|
+        flags << "--es.tls.ca=#{job_dir}/tls/es.tls.ca.pem"
+      end
+      if_p('es.tls.certificate') do |_|
+        flags << "--es.tls.cert=#{job_dir}/tls/es.tls.cert.pem"
+      end
+      if_p('es.tls.private_key') do |_|
+        flags << "--es.tls.key=#{job_dir}/tls/es.tls.key.pem"
+      end
+      if_p('es.token-file') do |_|
+        flags << "--es.token-file=#{job_dir}/config/es/token.txt"
+      end
+      if_p('es.tags-as-fields.tags') do |_|
+        flags << "--es.tags-as-fields.config-file=#{job_dir}/config/es/tags-as-fields.txt"
+      end
     end
-    if_p('es.tls.ca') do |_|
-      flags << '--es.tls.ca=/var/vcap/jobs/jaeger-all-in-one/tls/es.tls.ca.pem'
-    end
-    if_p('es.tls.certificate') do |_|
-      flags << '--es.tls.cert=/var/vcap/jobs/jaeger-all-in-one/tls/es.tls.cert.pem'
-    end
-    if_p('es.tls.private_key') do |_|
-      flags << '--es.tls.key=/var/vcap/jobs/jaeger-all-in-one/tls/es.tls.key.pem'
-    end
-    if_p('es.token-file') do |_|
-      flags << '--es.token-file=/var/vcap/jobs/jaeger-all-in-one/config/es/token.txt'
-    end
-    if_p('es.tags-as-fields.tags') do |_|
-      flags << '--es.tags-as-fields.config-file=/var/vcap/jobs/jaeger-all-in-one/config/es/tags-as-fields.txt'
-    end
-  else
-    raise "Only ['memory', 'badger', 'elasticsearch'] are supported values for span_storage_type, not: #{p('span_storage_type')}"
   end
 -%>
 processes:
-  - name: jaeger-all-in-one
-    executable: /var/vcap/packages/jaeger/jaeger-all-in-one
+  - name: <%= job_name %>
+    executable: <%= "/var/vcap/packages/jaeger/#{job_name}" %>
     env:
       SPAN_STORAGE_TYPE: <%= p('span_storage_type') %>
     <%- if p('span_storage_type') == 'badger' %>
     additional_volumes:
-    - path: /var/vcap/store/jaeger-all-in-one/keys
+    - path: <%= "/var/vcap/store/#{job_name}/keys" %>
       writable: true
-    - path: /var/vcap/store/jaeger-all-in-one/values
+    - path: <%= "/var/vcap/store/#{job_name}/values" %>
       writable: true
     <%- end %>
 
     args:
-    - --admin-http-port=14269
     <%- flags.each do |flag| -%>
     - <%= flag %>
     <%- end -%>

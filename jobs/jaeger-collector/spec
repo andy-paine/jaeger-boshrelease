@@ -1,20 +1,16 @@
 ---
-name: jaeger-all-in-one
+name: jaeger-collector
 packages:
 - jaeger
 
 templates:
   config/bpm.yml.erb: config/bpm.yml
-  config/ui.json.erb: config/ui.json
   config/sampling-strategies.json.erb: config/sampling-strategies.json
   config/es/tags-as-fields.txt.erb: config/es/tags-as-fields.txt
   config/es/token.txt.erb: config/es/token.txt
   tls/collector.grpc.tls.key.pem.erb: tls/collector.grpc.tls.key.pem
   tls/collector.grpc.tls.cert.pem.erb: tls/collector.grpc.tls.cert.pem
   tls/collector.grpc.tls.client-ca.pem.erb: tls/collector.grpc.tls.client-ca.pem
-  tls/reporter.grpc.tls.key.pem.erb: tls/reporter.grpc.tls.key.pem
-  tls/reporter.grpc.tls.cert.pem.erb: tls/reporter.grpc.tls.cert.pem
-  tls/reporter.grpc.tls.ca.pem.erb: tls/reporter.grpc.tls.ca.pem
   tls/es.tls.key.pem.erb: tls/es.tls.key.pem
   tls/es.tls.cert.pem.erb: tls/es.tls.cert.pem
   tls/es.tls.ca.pem.erb: tls/es.tls.ca.pem
@@ -26,7 +22,7 @@ consumes:
 properties:
   job-name:
     description: Name of this job - DO NOT CHANGE
-    default: jaeger-all-in-one
+    default: jaeger-collector
   admin-http-port:
     description: The http port for the admin server, including health check, /metrics, etc.
     default: 14269
@@ -47,49 +43,14 @@ properties:
   metrics-http-route:
     description: Defines the route of HTTP endpoint for metrics backends that support scraping
     default: "/metrics"
-  query.additional-headers:
-    description: Additional HTTP response headers
-    example:
-    - "Access-Control-Allow-Origin: https://example.com"
-  query.base-path:
-    description: "The base path for all HTTP routes, e.g. /jaeger; useful when running behind a reverse proxy"
-    default: "/"
-  query.bearer-token-propagation:
-    description: Allow propagation of bearer token to be used by storage plugins
-    default: false
-  query.port:
-    description: The port for the query service
-    default: 16686
-  query.static-files:
-    description: The directory path override for the static assets for the UI
-  query.ui-config:
-    description: UI configuration file contents in JSON format
   sampling.strategies-file:
     description: The content for the sampling strategies file in JSON format. See sampling documentation to see format of the file
   span_storage_type:
-    description: "What span storage type to use. Supported values are: memory, badger, elasticsearch"
-    default: badger
+    description: "What span storage type to use. Supported values are: elasticsearch"
+    default: elasticsearch
   memory.max-traces:
     description: The maximum amount of traces to store in memory
     default: 0
-  badger.consistency:
-    description: If all writes should be synced immediately to physical disk. This will impact write performance.
-    default: false
-  badger.maintenance-interval:
-    description: "How often the maintenance thread for values is ran. Format is time.Duration (https://golang.org/pkg/time/#Duration)"
-    default: 5m0s
-  badger.metrics-update-interval:
-    description: "How often the badger metrics are collected by Jaeger. Format is time.Duration (https://golang.org/pkg/time/#Duration)"
-    default: 10s
-  badger.read-only:
-    description: Allows to open badger database in read only mode. Multiple instances can open same database in read-only mode. Values still in the write-ahead-log must be replayed before opening.
-    default: false
-  badger.span-store-ttl:
-    description: "How long to store the data. Format is time.Duration (https://golang.org/pkg/time/#Duration)"
-    default: 72h0m0s
-  badger.truncate:
-    description: If write-ahead-log should be truncated on restart. this will cause data loss.
-    default: false
   collector.grpc-port:
     description: "The gRPC port for the collector service"
     default: 14250
@@ -139,72 +100,6 @@ properties:
   collector.zipkin.http-port:
     description: The HTTP port for the Zipkin collector service e.g. 9411
     default: 0
-  processor.jaeger-binary.server-host-port:
-    description: host:port for the jaeger-binary UDP server
-    default: ":6832"
-  processor.jaeger-binary.server-max-packet-size:
-    description: Max packet size for the jaeger-binary UDP server
-    default: 65000
-  processor.jaeger-binary.server-queue-size:
-    description: Length of the queue for the jaeger-binary UDP server
-    default: 1000
-  processor.jaeger-binary.workers:
-    description: How many jaeger-binary workers the processor should run
-    default: 10
-  processor.jaeger-compact.server-host-port:
-    description: host:port for the jaeger-compact UDP server
-    default: ":6831"
-  processor.jaeger-compact.server-max-packet-size:
-    description: Max packet size for the jaeger-compact UDP server
-    default: 65000
-  processor.jaeger-compact.server-queue-size:
-    description: Length of the queue for the jaeger-compact UDP server
-    default: 1000
-  processor.jaeger-compact.workers:
-    description: How many jaeger-compact workers the processor should run
-    default: 10
-  processor.zipkin-compact.server-host-port:
-    description: host:port for the zipkin-compact UDP server
-    default: ":5775"
-  processor.zipkin-compact.server-max-packet-size:
-    description: Max packet size for the zipkin-compact UDP server
-    default: 65000
-  processor.zipkin-compact.server-queue-size:
-    description: Length of the queue for the zipkin-compact UDP server
-    default: 1000
-  processor.zipkin-compact.workers:
-    description: How many zipkin-compact workers the processor should run
-    default: 10
-  reporter.grpc.discovery.min-peers:
-    description: Max number of collectors to which the agent will try to connect at any given time
-    default: 3
-  reporter.grpc.retry.max:
-    description: Sets the maximum number of retries for a call
-    default: 3
-  reporter.grpc.tls.skip-host-verify:
-    description: (insecure) Skip server's certificate chain and host name verification
-    default: false
-  reporter.grpc.host-port:
-    description: "List of host:port representing collectors to connect to directly"
-    example:
-    - "example.com:14250"
-  reporter.grpc.tls.ca:
-    description: TLS CA used to verify the remote server(s) (by default will use the system truststore)
-    example: |
-      -----BEGIN CERTIFICATE-----
-      etc.
-  reporter.grpc.tls.certificate:
-    description: TLS certificate, used to identify this process to the remote server(s)
-    example: |
-      -----BEGIN CERTIFICATE-----
-      etc.
-  reporter.grpc.tls.private_key:
-    description: TLS private key, used to identify this process to the remote server(s)
-    example: |
-      -----BEGIN RSA PRIVATE KEY-----
-      etc.
-  reporter.grpc.tls.server-name:
-    description: Override the TLS server name we expect in the certificate of the remove server(s)
   es.bulk.actions:
     description: The number of requests that can be enqueued before the bulk processor decides to commit
     default: 1000

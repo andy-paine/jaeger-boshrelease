@@ -3,7 +3,7 @@ require 'yaml'
 require 'bosh/template/test'
 require_relative 'spec_helper.rb'
 
-describe 'jaeger-all-in-one collector configuration' do
+describe 'jaeger-all-in-one: reporter configuration' do
   let(:release) { Bosh::Template::Test::ReleaseDir.new(File.join(File.dirname(__FILE__), '../')) }
   let(:job) { release.job('jaeger-all-in-one') }
 
