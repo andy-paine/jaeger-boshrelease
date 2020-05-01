@@ -193,3 +193,84 @@ properties:
       etc.
   reporter.grpc.tls.server-name:
     description: Override the TLS server name we expect in the certificate of the remove server(s)
+  es.bulk.actions:
+    description: The number of requests that can be enqueued before the bulk processor decides to commit
+    default: 1000
+  es.bulk.flush-interval:
+    description: A time.Duration after which bulk requests are committed, regardless of other thresholds. Set to zero to disable. By default, this is disabled.
+    default: 200ms
+  es.bulk.size:
+    description: The number of bytes that the bulk requests can take up before the bulk processor decides to commit
+    default: 5000000
+  es.bulk.workers:
+    description: The number of workers that are able to receive bulk requests and eventually commit them to Elasticsearch
+    default: 1
+  es.create-index-templates:
+    description: Create index templates at application startup. Set to false when templates are installed manually.
+    default: true
+  es.index-prefix:
+    description: 'Optional prefix of Jaeger indices. For example "production" creates "production-jaeger-*".'
+  es.max-num-spans:
+    description: The maximum number of spans to fetch at a time per query in Elasticsearch
+    default: 10000
+  es.max-span-age:
+    description: The maximum lookback for spans in Elasticsearch
+    default: 72h0m0s
+  es.num-replicas:
+    description: The number of replicas per index in Elasticsearch
+    default: 1
+  es.num-shards:
+    description: The number of shards per index in Elasticsearch
+    default: 5
+  es.password:
+    description: The password required by Elasticsearch
+  es.server-urls:
+    description: List of Elasticsearch servers, must be full url
+    example:
+    - 'http://127.0.0.1:9200'
+  es.sniffer:
+    description: The sniffer config for Elasticsearch; client uses sniffing process to find all nodes automatically, disable if not required
+    default: false
+  es.tags-as-fields.all:
+    description: (experimental) Store all span and process tags as object fields. If true .tags-as-fields.config-file is ignored. Binary tags are always stored as nested objects.
+    default: false
+  es.tags-as-fields.config-file:
+    description: (experimental) Contents of file containing tag keys which will be stored as object fields. Each key should be on a separate line.
+  es.tags-as-fields.dot-replacement:
+    description: '(experimental) The character used to replace dots (".") in tag keys stored as object fields.'
+  es.timeout:
+    description: Timeout used for queries. A Timeout of zero means no timeout
+    default: 0s
+  es.tls.ca:
+    description: Contents of a TLS CA (Certification Authority) file used to verify the remote server(s) (by default will use the system truststore)
+    example: |
+      -----BEGIN CERTIFICATE-----
+      etc.
+  es.tls.cert:
+    description: Contents of a TLS Certificate file, used to identify this process to the remote server(s)
+    example: |
+      -----BEGIN CERTIFICATE-----
+      etc.
+  es.tls.key:
+    description: Contents of a TLS Private Key file, used to identify this process to the remote server(s)
+    default:
+    example: |
+      -----BEGIN RSA PRIVATE KEY-----
+      etc.
+  es.tls.enabled:
+    description: Enable TLS when talking to the remote server(s)
+    default: false
+  es.tls.server-name:
+    description: Override the TLS server name we expect in the certificate of the remove server(s)
+  es.tls.skip-host-verify:
+    description: (insecure) Skip server's certificate chain and host name verification
+    default: false
+  es.token-file:
+    description: Contents of a file containing bearer token. This flag also loads CA if it is specified.
+  es.use-aliases:
+    description: (experimental) Use read and write aliases for indices. Use this option with Elasticsearch rollover API. It requires an external component to create aliases before startup and then performing its management. Note that es.max-span-age is not taken into the account and has to be substituted by external component managing read alias.
+    default: false
+  es.username:
+    description: The username required by Elasticsearch. The basic authentication also loads CA if it is specified.
+  es.version:
+    description: The major Elasticsearch version. If not specified, the value will be auto-detected from Elasticsearch.

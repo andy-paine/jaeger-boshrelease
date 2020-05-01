@@ -87,8 +87,28 @@
     ['badger.consistency', 'badger.maintenance-interval', 'badger.metrics-update-interval', 'badger.read-only', 'badger.span-store-ttl', 'badger.truncate'].each do |property|
       flags << "--#{property}=#{p(property)}"
     end
+  when 'elasticsearch'
+    [
+      'es.bulk.actions',
+      'es.bulk.flush-interval',
+      'es.bulk.size',
+      'es.bulk.workers',
+      'es.create-index-templates',
+      'es.max-num-spans',
+      'es.max-span-age',
+      'es.num-replicas',
+      'es.num-shards',
+      'es.sniffer',
+      'es.tags-as-fields.all',
+      'es.timeout',
+      'es.tls.enabled',
+      'es.tls.skip-host-verify',
+      'es.use-aliases',
+    ].each do |property|
+      flags << "--#{property}=#{p(property)}"
+    end
   else
-    raise "Only ['memory', 'badger'] are supported values for span_storage_type, not: #{p('span_storage_type')}"
+    raise "Only ['memory', 'badger', 'elasticsearch'] are supported values for span_storage_type, not: #{p('span_storage_type')}"
   end
 -%>
 processes:
