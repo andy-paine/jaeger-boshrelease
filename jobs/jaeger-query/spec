@@ -17,6 +17,16 @@ consumes:
   type: elasticsearch
   optional: true
 
+provides:
+- name: jaeger-query
+  type: jaeger-query
+  properties:
+  - admin-http-port
+  - metrics-backend
+  - metrics-http-route
+  - query.port
+  - query.base-path
+
 properties:
   job-name:
     description: Name of this job - DO NOT CHANGE

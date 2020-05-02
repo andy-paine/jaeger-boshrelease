@@ -45,6 +45,14 @@ provides:
   - collector.http-port
   - collector.port
   - collector.zipkin.http-port
+- name: jaeger-query
+  type: jaeger-query
+  properties:
+  - admin-http-port
+  - metrics-backend
+  - metrics-http-route
+  - query.port
+  - query.base-path
 
 properties:
   job-name:
