@@ -24,6 +24,18 @@ consumes:
   type: elasticsearch
   optional: true
 
+provides:
+- name: jaeger-agent
+  type: jaeger-agent
+  properties:
+  - admin-http-port
+  - http-server.host-port
+  - processor.jaeger-binary.server-host-port
+  - processor.jaeger-compact.server-host-port
+  - processor.zipkin-compact.server-host-port
+  - metrics-backend
+  - metrics-http-route
+
 properties:
   job-name:
     description: Name of this job - DO NOT CHANGE
