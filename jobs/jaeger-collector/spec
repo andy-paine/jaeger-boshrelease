@@ -20,6 +20,18 @@ consumes:
   type: elasticsearch
   optional: true
 
+provides:
+- name: jaeger-collector
+  type: jaeger-collector
+  properties:
+  - admin-http-port
+  - metrics-backend
+  - metrics-http-route
+  - collector.grpc-port
+  - collector.http-port
+  - collector.port
+  - collector.zipkin.http-port
+
 properties:
   job-name:
     description: Name of this job - DO NOT CHANGE

@@ -29,12 +29,22 @@ provides:
   type: jaeger-agent
   properties:
   - admin-http-port
+  - metrics-backend
+  - metrics-http-route
   - http-server.port
   - processor.jaeger-binary.port
   - processor.jaeger-compact.port
   - processor.zipkin-compact.port
+- name: jaeger-collector
+  type: jaeger-collector
+  properties:
+  - admin-http-port
   - metrics-backend
   - metrics-http-route
+  - collector.grpc-port
+  - collector.http-port
+  - collector.port
+  - collector.zipkin.http-port
 
 properties:
   job-name:
