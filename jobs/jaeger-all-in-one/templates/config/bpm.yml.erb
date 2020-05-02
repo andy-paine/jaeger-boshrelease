@@ -11,12 +11,13 @@
     properties.map do |property| "--#{property}=#{p(property)}" end
   end
 
-
   required_flags = case job_name
   when 'jaeger-all-in-one'
     [:collector, :query, :processor, :storage]
   when 'jaeger-collector'
     [:collector, :storage]
+  when 'jaeger-query'
+    [:query, :storage]
   end
 
   # COMMON
@@ -105,6 +106,7 @@
     supported_storage_types = {
       'jaeger-all-in-one' => ['memory', 'badger', 'elasticsearch'],
       'jaeger-collector' => ['elasticsearch'],
+      'jaeger-query' => ['elasticsearch'],
     }
     unless supported_storage_types[job_name].include? p('span_storage_type')
       raise "#{p('span_storage_type')} is not a supported span_storage_type for #{job_name}"

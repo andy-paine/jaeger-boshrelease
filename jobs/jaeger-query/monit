@@ -1,0 +1,5 @@
+check process jaeger-query
+  with pidfile /var/vcap/sys/run/bpm/jaeger-query/jaeger-query.pid
+  start program "/var/vcap/jobs/bpm/bin/bpm start jaeger-query"
+  stop program "/var/vcap/jobs/bpm/bin/bpm stop jaeger-query"
+  group vcap

@@ -5,7 +5,7 @@ require 'yaml'
 require 'bosh/template/test'
 require_relative 'spec_helper.rb'
 
-['jaeger-all-in-one', 'jaeger-collector'].each do |job_name|
+['jaeger-all-in-one', 'jaeger-collector', 'jaeger-query'].each do |job_name|
   describe "#{job_name}: elasticsearch configuration" do
     let(:release) { Bosh::Template::Test::ReleaseDir.new(File.join(File.dirname(__FILE__), '../')) }
     let(:job) { release.job(job_name) }

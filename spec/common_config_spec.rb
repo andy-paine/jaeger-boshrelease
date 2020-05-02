@@ -3,7 +3,7 @@ require 'yaml'
 require 'bosh/template/test'
 require_relative 'spec_helper.rb'
 
-['jaeger-all-in-one', 'jaeger-collector'].each do |job_name|
+['jaeger-all-in-one', 'jaeger-collector', 'jaeger-query'].each do |job_name|
   describe "#{job_name}: common configuration" do
     let(:release) { Bosh::Template::Test::ReleaseDir.new(File.join(File.dirname(__FILE__), '../')) }
     let(:job) { release.job(job_name) }
@@ -12,7 +12,7 @@ require_relative 'spec_helper.rb'
       case job_name
       when 'jaeger-all-in-one'
         {}
-      when 'jaeger-collector'
+      when 'jaeger-collector', 'jaeger-query'
         {'span_storage_type' => 'elasticsearch', 'es' => { 'server-urls' => ['http://10.0.0.1:9200', 'http://10.0.0.2:9200']}}
       end
     }
