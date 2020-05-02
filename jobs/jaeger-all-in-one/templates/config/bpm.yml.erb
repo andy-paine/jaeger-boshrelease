@@ -2,6 +2,8 @@
   require 'yaml'
   job_name = p('job-name')
   job_dir = "/var/vcap/jobs/#{job_name}"
+  env = {}
+  additional_volumes = []
   :collector
   :query
   :processor
@@ -18,6 +20,8 @@
     [:collector, :storage]
   when 'jaeger-query'
     [:query, :storage]
+  when 'jaeger-agent'
+    [:processor]
   end
 
   # COMMON
@@ -112,6 +116,8 @@
       raise "#{p('span_storage_type')} is not a supported span_storage_type for #{job_name}"
     end
 
+    env['SPAN_STORAGE_TYPE'] = p('span_storage_type')
+
     case p('span_storage_type')
     when 'memory'
       flags << "--memory.max-traces=#{p('memory.max-traces')}"
@@ -122,6 +128,8 @@
       ['badger.consistency', 'badger.maintenance-interval', 'badger.metrics-update-interval', 'badger.read-only', 'badger.span-store-ttl', 'badger.truncate'].each do |property|
         flags << "--#{property}=#{p(property)}"
       end
+      additional_volumes << { 'path' => "/var/vcap/store/#{job_name}/keys", 'writable' => true }
+      additional_volumes << { 'path' => "/var/vcap/store/#{job_name}/values", 'writable' => true }
     when 'elasticsearch'
       [
         'es.bulk.actions',
@@ -182,15 +190,17 @@
 processes:
   - name: <%= job_name %>
     executable: <%= "/var/vcap/packages/jaeger/#{job_name}" %>
+
     env:
-      SPAN_STORAGE_TYPE: <%= p('span_storage_type') %>
-    <%- if p('span_storage_type') == 'badger' %>
+      <%- env.each_pair do |key, value| -%>
+      <%= "#{key}: #{value}" %>
+      <%- end -%>
+
     additional_volumes:
-    - path: <%= "/var/vcap/store/#{job_name}/keys" %>
-      writable: true
-    - path: <%= "/var/vcap/store/#{job_name}/values" %>
-      writable: true
-    <%- end %>
+    <%- additional_volumes.each do |volume| -%>
+    - path: <%= volume['path'] %>
+      writable: <%= volume['writable'] %>
+    <%- end -%>
 
     args:
     <%- flags.each do |flag| -%>
