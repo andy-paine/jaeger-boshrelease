@@ -53,6 +53,18 @@ require_relative 'spec_helper.rb'
         args = get_process_from_bpm(YAML::load(template.render config), job_name)['args']
         expect(args).to include '--reporter.grpc.host-port=host1:port1,host2:port2'
       end
+
+      it 'should consume grpc host-ports from jaeger-collector link when available' do
+        jaeger_collector_link = Bosh::Template::Test::Link.new(
+          name: 'jaeger-collector',
+          properties: { 'collector' => { 'grpc-port' => 9999 }},
+          address: 'collectors.jaeger',
+        )
+        rendered = template.render(config, consumes: [jaeger_collector_link])
+        args = get_process_from_bpm(YAML::load(rendered), job_name)['args']
+        expect(args).to include '--reporter.grpc.host-port=dns:///collectors.jaeger:9999'
+
+      end
     end
 
     describe 'tls files' do

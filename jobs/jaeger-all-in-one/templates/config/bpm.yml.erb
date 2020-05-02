@@ -88,8 +88,14 @@
       port = p("#{server}.port")
       flags << "--#{server}.server-host-port=0.0.0.0:#{port}"
     end
-    if_p('reporter.grpc.host-port') do |host_port|
-      flags << "--reporter.grpc.host-port=#{p('reporter.grpc.host-port').join(',')}"
+    if_link('jaeger-collector') do |collector_link|
+      # Uses dns:/// to allow for dynamic resolution and round-robin load balancing
+      collector_address = "dns:///#{collector_link.address}:#{collector_link.p('collector.grpc-port')}"
+      flags << "--reporter.grpc.host-port=#{collector_address}"
+    end.else do
+      if_p('reporter.grpc.host-port') do |host_port|
+        flags << "--reporter.grpc.host-port=#{p('reporter.grpc.host-port').join(',')}"
+      end
     end
     if_p('reporter.grpc.tls.private_key', 'reporter.grpc.tls.certificate') do |key,cert|
       flags << '--reporter.grpc.tls.enabled=true'

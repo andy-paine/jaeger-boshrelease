@@ -23,6 +23,10 @@ consumes:
 - name: elasticsearch
   type: elasticsearch
   optional: true
+- name: jaeger-collector
+  type: jaeger-collector
+  optional: true
+  ip_addresses: false
 
 provides:
 - name: jaeger-agent

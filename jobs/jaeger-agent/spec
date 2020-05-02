@@ -9,6 +9,12 @@ templates:
   tls/reporter.grpc.tls.cert.pem.erb: tls/reporter.grpc.tls.cert.pem
   tls/reporter.grpc.tls.ca.pem.erb: tls/reporter.grpc.tls.ca.pem
 
+consumes:
+- name: jaeger-collector
+  type: jaeger-collector
+  optional: true
+  ip_addresses: false
+
 provides:
 - name: jaeger-agent
   type: jaeger-agent
