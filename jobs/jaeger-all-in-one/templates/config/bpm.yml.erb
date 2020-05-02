@@ -4,10 +4,6 @@
   job_dir = "/var/vcap/jobs/#{job_name}"
   env = {}
   additional_volumes = []
-  :collector
-  :query
-  :processor
-  :storage
 
   def to_flags(properties)
     properties.map do |property| "--#{property}=#{p(property)}" end

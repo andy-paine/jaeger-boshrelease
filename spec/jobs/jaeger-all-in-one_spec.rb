@@ -18,20 +18,20 @@ describe 'jaeger-all-in-one: specific configuration' do
 
   it 'sets memory storage type flags' do
     config = { 'span_storage_type' => 'memory', 'memory' => { 'max-traces' => 10 } }
-    args = get_process_from_bpm(YAML::load template.render(config))['args']
+    args = get_process_from_bpm(YAML::load(template.render config), 'jaeger-all-in-one')['args']
     expect(args).to include '--memory.max-traces=10'
   end
 
   describe 'badger storage type' do
     let(:config) { { 'span_storage_type' => 'badger' } }
     it 'creates additional volumes' do
-      process = get_process_from_bpm(YAML::load template.render(config))
+      process = get_process_from_bpm(YAML::load(template.render config), 'jaeger-all-in-one')
       expect(process['additional_volumes']).to include({'path' => '/var/vcap/store/jaeger-all-in-one/keys', 'writable' => true })
       expect(process['additional_volumes']).to include({ 'path' => '/var/vcap/store/jaeger-all-in-one/values', 'writable' => true })
     end
 
     it 'sets badger CLI flags' do
-      args = get_process_from_bpm(YAML::load template.render(config))['args']
+      args = get_process_from_bpm(YAML::load(template.render config), 'jaeger-all-in-one')['args']
       expect(args).to include '--badger.ephemeral=false'
       expect(args).to include '--badger.directory-key=/var/vcap/store/jaeger-all-in-one/keys'
       expect(args).to include '--badger.directory-value=/var/vcap/store/jaeger-all-in-one/values'
