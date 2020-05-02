@@ -15,6 +15,7 @@ templates:
 consumes:
 - name: elasticsearch
   type: elasticsearch
+  optional: true
 
 properties:
   job-name:
