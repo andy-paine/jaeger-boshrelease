@@ -22,7 +22,7 @@
 
   # COMMON
   flags = to_flags [
-    'admin-http-port', 'downsampling.ratio', 'http-server.host-port', 'log-level',
+    'admin-http-port', 'downsampling.ratio', 'log-level',
     'metrics-backend', 'metrics-http-route',
   ]
   if_p('downsampling.hashsalt') do |hashsalt|
@@ -83,6 +83,7 @@
       'processor.zipkin-compact.server-max-packet-size', 'processor.zipkin-compact.server-queue-size', 'processor.zipkin-compact.workers',
       'reporter.grpc.discovery.min-peers', 'reporter.grpc.retry.max', 'reporter.grpc.tls.skip-host-verify',
     ]
+    flags << "--http-server.host-port=0.0.0.0:#{p('http-server.port')}"
     ['processor.jaeger-binary', 'processor.jaeger-compact', 'processor.zipkin-compact'].each do |server|
       port = p("#{server}.port")
       flags << "--#{server}.server-host-port=0.0.0.0:#{port}"

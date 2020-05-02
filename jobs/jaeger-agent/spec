@@ -14,7 +14,7 @@ provides:
   type: jaeger-agent
   properties:
   - admin-http-port
-  - http-server.host-port
+  - http-server.port
   - processor.jaeger-binary.port
   - processor.jaeger-compact.port
   - processor.zipkin-compact.port
@@ -33,9 +33,9 @@ properties:
   downsampling.ratio:
     description: "Ratio of spans passed to storage after downsampling (between 0 and 1), e.g ratio = 0.3 means we are keeping 30% of spans and dropping 70% of spans; ratio = 1.0 disables downsampling."
     default: 1.0
-  http-server.host-port:
-    description: "host:port of the http server (e.g. for /sampling point and /baggageRestrictions endpoint)"
-    default: ":5778"
+  http-server.port:
+    description: Port of the http server (e.g. for /sampling point and /baggageRestrictions endpoint)
+    default: 5778
   log-level:
     description: "Minimal allowed log Level. For more levels see https://github.com/uber-go/zap"
     default: info

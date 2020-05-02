@@ -11,6 +11,7 @@ require_relative 'spec_helper.rb'
 
     it 'should set sensible defaults' do
       args = get_process_from_bpm(YAML::load(template.render({})), job_name)['args']
+      expect(args).to include '--http-server.host-port=0.0.0.0:5778'
       expect(args).to include '--processor.jaeger-binary.server-host-port=0.0.0.0:6832'
       expect(args).to include '--processor.jaeger-binary.server-max-packet-size=65000'
       expect(args).to include '--processor.jaeger-binary.server-queue-size=1000'
