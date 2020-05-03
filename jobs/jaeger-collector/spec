@@ -38,7 +38,7 @@ properties:
     default: jaeger-collector
   admin-http-port:
     description: The http port for the admin server, including health check, /metrics, etc.
-    default: 14269
+    default: 14270
   downsampling.hashsalt:
     description: Salt used when hashing trace id for downsampling.
   downsampling.ratio:

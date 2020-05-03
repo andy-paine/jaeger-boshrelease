@@ -12,7 +12,6 @@ require_relative 'spec_helper.rb'
 
     it 'should set sensible defaults' do
       args = get_process_from_bpm(YAML::load(template.render config), job_name)['args']
-      expect(args).to include '--admin-http-port=14269'
       expect(args).to include '--log-level=info'
       expect(args).to include '--metrics-backend=prometheus'
       expect(args).to include '--metrics-http-route=/metrics'

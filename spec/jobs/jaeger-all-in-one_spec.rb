@@ -10,6 +10,11 @@ describe 'jaeger-all-in-one: specific configuration' do
   let(:template) { job.template('config/bpm.yml') }
   let(:config) { es_config }
 
+  it 'uses the correct admin port' do
+    args = get_process_from_bpm(YAML::load(template.render(config)), 'jaeger-all-in-one')['args']
+    expect(args).to include '--admin-http-port=14269'
+  end
+
   it 'only allows supported span_storage_types' do
     expect{ template.render({'span_storage_type' => 'memory'}) }.not_to raise_error
     expect{ template.render({'span_storage_type' => 'badger'}) }.not_to raise_error

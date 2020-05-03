@@ -9,6 +9,11 @@ describe 'jaeger-collector: specific configuration' do
   let(:template) { job.template('config/bpm.yml') }
   let(:config) { es_config }
 
+  it 'uses the correct admin port' do
+    args = get_process_from_bpm(YAML::load(template.render(config)), 'jaeger-collector')['args']
+    expect(args).to include '--admin-http-port=14270'
+  end
+
   it 'only allows supported span_storage_types' do
     expect{ template.render({'span_storage_type' => 'elasticsearch', 'es' => { 'server-urls' => ['foo']}}) }.not_to raise_error
     expect{ template.render({'span_storage_type' => 'memory'}) }.to raise_error('memory is not a supported span_storage_type for jaeger-collector')
