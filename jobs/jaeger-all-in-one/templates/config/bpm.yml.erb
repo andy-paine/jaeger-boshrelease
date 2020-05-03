@@ -21,20 +21,17 @@
   end
 
   # COMMON
-  flags = to_flags [
-    'admin-http-port', 'downsampling.ratio', 'log-level',
-    'metrics-backend', 'metrics-http-route',
-  ]
-  if_p('downsampling.hashsalt') do |hashsalt|
-    flags << "--downsampling.hashsalt=#{hashsalt}"
-  end
+  flags = to_flags ['admin-http-port', 'log-level', 'metrics-backend', 'metrics-http-route']
 
   # COLLECTOR
   if required_flags.include? :collector
     flags += to_flags [
-      'collector.grpc-port', 'collector.http-port', 'collector.num-workers', 'collector.port',
-      'collector.queue-size', 'collector.queue-size-memory', 'collector.zipkin.http-port',
+      'collector.grpc-port', 'collector.http-port', 'collector.port', 'collector.zipkin.http-port',
+      'collector.num-workers', 'collector.queue-size', 'collector.queue-size-memory', 'downsampling.ratio',
     ]
+    if_p('downsampling.hashsalt') do |hashsalt|
+      flags << "--downsampling.hashsalt=#{hashsalt}"
+    end
     if_p('sampling.strategies-file') do |_|
       flags << "--sampling.strategies-file=#{job_dir}/config/sampling-strategies.json"
     end

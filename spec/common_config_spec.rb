@@ -20,18 +20,9 @@ require_relative 'spec_helper.rb'
     it 'should set sensible defaults' do
       args = get_process_from_bpm(YAML::load(template.render config), job_name)['args']
       expect(args).to include '--admin-http-port=14269'
-      expect(args).to include '--downsampling.ratio=1.0'
       expect(args).to include '--log-level=info'
       expect(args).to include '--metrics-backend=prometheus'
       expect(args).to include '--metrics-http-route=/metrics'
-
-      expect(args).to_not include '--downsampling.hashsalt'
-    end
-
-    it 'should include downsampling hashsalt when provided' do
-      config['downsampling'] = { 'hashsalt' => 'foo' }
-      args = get_process_from_bpm(YAML::load(template.render config), job_name)['args']
-      expect(args).to include '--downsampling.hashsalt=foo'
     end
   end
 end

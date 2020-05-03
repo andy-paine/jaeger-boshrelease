@@ -31,11 +31,13 @@ require_relative 'spec_helper.rb'
         expect(args).to include '--collector.zipkin.http-port=0'
         expect(args).to include '--collector.zipkin.allowed-headers=content-type'
         expect(args).to include '--collector.zipkin.allowed-origins=*'
+        expect(args).to include '--downsampling.ratio=1.0'
 
         expect(args).to_not include '--collector.tags'
         expect(args).to_not include '--collector.grpc.tls.cert'
         expect(args).to_not include '--collector.grpc.tls.key'
         expect(args).to_not include '--collector.grpc.tls.client-ca'
+        expect(args).to_not include '--downsampling.hashsalt'
       end
 
       it 'should enable grpc tls when a key and certificate are provided' do
@@ -69,6 +71,12 @@ require_relative 'spec_helper.rb'
         config['sampling'] = { 'strategies-file' => '{ "some": "json" }' }
         args = get_process_from_bpm(YAML::load(template.render config), job_name)['args']
         expect(args).to include "--sampling.strategies-file=/var/vcap/jobs/#{job_name}/config/sampling-strategies.json"
+      end
+
+      it 'should include downsampling hashsalt when provided' do
+        config['downsampling'] = { 'hashsalt' => 'foo' }
+        args = get_process_from_bpm(YAML::load(template.render config), job_name)['args']
+        expect(args).to include '--downsampling.hashsalt=foo'
       end
     end
 
