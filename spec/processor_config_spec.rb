@@ -8,9 +8,10 @@ require_relative 'spec_helper.rb'
     let(:release) { Bosh::Template::Test::ReleaseDir.new(File.join(File.dirname(__FILE__), '../')) }
     let(:job) { release.job(job_name) }
     let(:template) { job.template('config/bpm.yml') }
+    let(:config) { get_default_config job_name }
 
     it 'should set sensible defaults' do
-      args = get_process_from_bpm(YAML::load(template.render({})), job_name)['args']
+      args = get_process_from_bpm(YAML::load(template.render(config)), job_name)['args']
       expect(args).to include '--http-server.host-port=0.0.0.0:5778'
       expect(args).to include '--processor.jaeger-binary.server-host-port=0.0.0.0:6832'
       expect(args).to include '--processor.jaeger-binary.server-max-packet-size=65000'

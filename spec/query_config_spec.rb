@@ -7,14 +7,7 @@ require_relative 'spec_helper.rb'
   describe "#{job_name}: query configuration" do
     let(:release) { Bosh::Template::Test::ReleaseDir.new(File.join(File.dirname(__FILE__), '../')) }
     let(:job) { release.job(job_name) }
-    let(:config) {
-      case job_name
-      when 'jaeger-all-in-one'
-        {}
-      when 'jaeger-query'
-        {'span_storage_type' => 'elasticsearch', 'es' => { 'server-urls' => ['http://10.0.0.1:9200', 'http://10.0.0.2:9200']}}
-      end
-    }
+    let(:config) { get_default_config job_name }
 
     describe 'bpm.yml' do
       let(:template) { job.template('config/bpm.yml') }

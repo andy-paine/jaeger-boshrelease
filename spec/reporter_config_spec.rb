@@ -7,12 +7,13 @@ require_relative 'spec_helper.rb'
   describe "#{job_name}: reporter configuration" do
     let(:release) { Bosh::Template::Test::ReleaseDir.new(File.join(File.dirname(__FILE__), '../')) }
     let(:job) { release.job(job_name) }
+    let(:config) { get_default_config job_name }
 
     describe 'bpm.yml' do
       let(:template) { job.template('config/bpm.yml') }
 
       it 'should set sensible defaults' do
-        args = get_process_from_bpm(YAML::load(template.render({})), job_name)['args']
+        args = get_process_from_bpm(YAML::load(template.render config), job_name)['args']
         expect(args).to include '--reporter.grpc.discovery.min-peers=3'
         expect(args).to include '--reporter.grpc.retry.max=3'
         expect(args).to include '--reporter.grpc.tls.enabled=false'
@@ -25,27 +26,30 @@ require_relative 'spec_helper.rb'
         expect(args).to_not include '--reporter.grpc.tls.server-name'
       end
 
-      let(:config) {
-        { 'reporter' => { 'grpc' => { 'tls' => { 'private_key' => '--- BEGIN KEY ---', 'certificate' => '--- BEGIN CERT ---' }}}}
-      }
+      describe 'tls configuration' do
+        let(:config) {
+          tls_config = { 'reporter' => { 'grpc' => { 'tls' => { 'private_key' => '--- BEGIN KEY ---', 'certificate' => '--- BEGIN CERT ---' }}}}
+          get_default_config(job_name).merge tls_config
+        }
 
-      it 'should enable grpc tls when a key and certificate are provided' do
-        args = get_process_from_bpm(YAML::load(template.render config), job_name)['args']
-        expect(args).to include '--reporter.grpc.tls.enabled=true'
-        expect(args).to include "--reporter.grpc.tls.cert=/var/vcap/jobs/#{job_name}/tls/reporter.grpc.tls.cert.pem"
-        expect(args).to include "--reporter.grpc.tls.key=/var/vcap/jobs/#{job_name}/tls/reporter.grpc.tls.key.pem"
-      end
+        it 'should enable grpc tls when a key and certificate are provided' do
+          args = get_process_from_bpm(YAML::load(template.render config), job_name)['args']
+          expect(args).to include '--reporter.grpc.tls.enabled=true'
+          expect(args).to include "--reporter.grpc.tls.cert=/var/vcap/jobs/#{job_name}/tls/reporter.grpc.tls.cert.pem"
+          expect(args).to include "--reporter.grpc.tls.key=/var/vcap/jobs/#{job_name}/tls/reporter.grpc.tls.key.pem"
+        end
 
-      it 'should include grpc ca cert when provided' do
-        config['reporter']['grpc']['tls']['ca'] = '--- BEGIN CERT ---'
-        args = get_process_from_bpm(YAML::load(template.render config), job_name)['args']
-        expect(args).to include "--reporter.grpc.tls.ca=/var/vcap/jobs/#{job_name}/tls/reporter.grpc.tls.ca.pem"
-      end
+        it 'should include grpc ca cert when provided' do
+          config['reporter']['grpc']['tls']['ca'] = '--- BEGIN CERT ---'
+          args = get_process_from_bpm(YAML::load(template.render config), job_name)['args']
+          expect(args).to include "--reporter.grpc.tls.ca=/var/vcap/jobs/#{job_name}/tls/reporter.grpc.tls.ca.pem"
+        end
 
-      it 'should include set grpc server name when provided' do
-        config['reporter']['grpc']['tls']['server-name'] = 'example.com'
-        args = get_process_from_bpm(YAML::load(template.render config), job_name)['args']
-        expect(args).to include '--reporter.grpc.tls.server-name=example.com'
+        it 'should include set grpc server name when provided' do
+          config['reporter']['grpc']['tls']['server-name'] = 'example.com'
+          args = get_process_from_bpm(YAML::load(template.render config), job_name)['args']
+          expect(args).to include '--reporter.grpc.tls.server-name=example.com'
+        end
       end
 
       it 'should provide grpc host-ports as comma separated list' do

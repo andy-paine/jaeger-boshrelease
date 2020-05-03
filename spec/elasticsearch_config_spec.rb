@@ -9,7 +9,8 @@ require_relative 'spec_helper.rb'
   describe "#{job_name}: elasticsearch configuration" do
     let(:release) { Bosh::Template::Test::ReleaseDir.new(File.join(File.dirname(__FILE__), '../')) }
     let(:job) { release.job(job_name) }
-    let(:config) { { 'span_storage_type' => 'elasticsearch', 'es' => { 'server-urls' => ['http://10.0.0.1:9200', 'http://10.0.0.2:9200'] }}}
+    let(:config) { es_config }
+
     describe 'bpm.yml' do
       let(:template) { job.template('config/bpm.yml') }
 
@@ -149,7 +150,7 @@ require_relative 'spec_helper.rb'
       end
 
       it 'populates the file with each key on a new line' do
-        config['es'] = { 'server-urls' => [], 'tags-as-fields' => { 'tags' => ['foo', 'bar'] }}
+        config['es']['tags-as-fields'] = { 'tags' => ['foo', 'bar'] }
         expect(template.render(config)).to eq(<<~EOF
         foo
         bar
@@ -165,7 +166,7 @@ require_relative 'spec_helper.rb'
       end
 
       it 'populates the file with token' do
-        config['es'] = { 'server-urls' => [], 'token-file' => 'test-token' }
+        config['es']['token-file'] = 'test-token'
         expect(template.render(config)).to eq('test-token')
       end
     end
