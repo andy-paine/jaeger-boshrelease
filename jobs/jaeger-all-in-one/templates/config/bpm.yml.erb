@@ -17,7 +17,7 @@
   when 'jaeger-query'
     [:query, :storage]
   when 'jaeger-agent'
-    [:processor]
+    [:processor, :reporter]
   end
 
   # COMMON
@@ -59,9 +59,7 @@
 
   # QUERY
   if required_flags.include? :query
-    flags += to_flags [
-      'query.base-path', 'query.bearer-token-propagation', 'query.port',
-    ]
+    flags += to_flags ['query.base-path', 'query.bearer-token-propagation', 'query.port']
     if_p('query.static-files') do |static_files_dir|
       flags << "--query.static-files=#{static_files_dir}"
     end
@@ -81,13 +79,17 @@
       'processor.jaeger-binary.server-max-packet-size', 'processor.jaeger-binary.server-queue-size', 'processor.jaeger-binary.workers',
       'processor.jaeger-compact.server-max-packet-size', 'processor.jaeger-compact.server-queue-size', 'processor.jaeger-compact.workers',
       'processor.zipkin-compact.server-max-packet-size', 'processor.zipkin-compact.server-queue-size', 'processor.zipkin-compact.workers',
-      'reporter.grpc.discovery.min-peers', 'reporter.grpc.retry.max', 'reporter.grpc.tls.skip-host-verify',
     ]
     flags << "--http-server.host-port=0.0.0.0:#{p('http-server.port')}"
     ['processor.jaeger-binary', 'processor.jaeger-compact', 'processor.zipkin-compact'].each do |server|
       port = p("#{server}.port")
       flags << "--#{server}.server-host-port=0.0.0.0:#{port}"
     end
+  end
+
+  # REPORTER
+  if required_flags.include? :reporter
+    flags += to_flags ['reporter.grpc.discovery.min-peers', 'reporter.grpc.retry.max', 'reporter.grpc.tls.skip-host-verify']
     if_link('jaeger-collector') do |collector_link|
       # Uses dns:/// to allow for dynamic resolution and round-robin load balancing
       collector_address = "dns:///#{collector_link.address}:#{collector_link.p('collector.grpc-port')}"
