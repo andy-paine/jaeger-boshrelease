@@ -1,0 +1,33 @@
+---
+releases:
+- name: jaeger
+  version: ((jaeger_release_version))
+- name: bpm
+  version: ((bpm_release_version))
+
+addons:
+- name: jaeger-agent
+  exclude:
+    jobs:
+    - name: bpm
+      release: bpm
+  jobs:
+  - name: bpm
+    release: bpm
+  - name: jaeger-agent
+    consumes:
+      jaeger-collector:
+        deployment: jaeger-collector-query
+    release: jaeger
+
+- name: jaeger-agent-no-bpm
+  include:
+    jobs:
+    - name: bpm
+      release: bpm
+  jobs:
+  - name: jaeger-agent
+    consumes:
+      jaeger-collector:
+        deployment: jaeger-collector-query
+    release: jaeger

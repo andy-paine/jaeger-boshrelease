@@ -1,0 +1,53 @@
+---
+name: jaeger-collector-query
+
+releases:
+- name: jaeger
+  version: latest
+- name: bpm
+  version: latest
+
+instance_groups:
+- name: jaeger-collector-query
+  azs:
+  - z1
+  instances: 1
+  jobs:
+  - name: bpm
+    release: bpm
+  - name: jaeger-collector
+    consumes:
+      elasticsearch:
+        deployment: elasticsearch
+    provides:
+      jaeger-collector:
+        shared: true
+    properties:
+      span_storage_type: elasticsearch
+    release: jaeger
+  - name: jaeger-query
+    consumes:
+      elasticsearch:
+        deployment: elasticsearch
+    properties:
+      span_storage_type: elasticsearch
+    release: jaeger
+  networks:
+  - name: default
+  stemcell: xenial
+  update:
+    max_in_flight: 1
+    serial: true
+  vm_type: default
+  persistent_disk_type: default
+
+stemcells:
+- alias: xenial
+  os: ubuntu-xenial
+  version: latest
+
+update:
+  canaries: 1
+  canary_watch_time: 30000-600000
+  max_in_flight: 3
+  update_watch_time: 5000-600000
