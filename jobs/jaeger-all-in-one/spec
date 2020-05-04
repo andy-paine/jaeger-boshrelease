@@ -210,36 +210,6 @@ properties:
   processor.zipkin-compact.workers:
     description: How many zipkin-compact workers the processor should run
     default: 10
-  reporter.grpc.discovery.min-peers:
-    description: Max number of collectors to which the agent will try to connect at any given time
-    default: 3
-  reporter.grpc.retry.max:
-    description: Sets the maximum number of retries for a call
-    default: 3
-  reporter.grpc.tls.skip-host-verify:
-    description: (insecure) Skip server's certificate chain and host name verification
-    default: false
-  reporter.grpc.host-port:
-    description: "List of host:port representing collectors to connect to directly"
-    example:
-    - "example.com:14250"
-  reporter.grpc.tls.ca:
-    description: TLS CA used to verify the remote server(s) (by default will use the system truststore)
-    example: |
-      -----BEGIN CERTIFICATE-----
-      etc.
-  reporter.grpc.tls.certificate:
-    description: TLS certificate, used to identify this process to the remote server(s)
-    example: |
-      -----BEGIN CERTIFICATE-----
-      etc.
-  reporter.grpc.tls.private_key:
-    description: TLS private key, used to identify this process to the remote server(s)
-    example: |
-      -----BEGIN RSA PRIVATE KEY-----
-      etc.
-  reporter.grpc.tls.server-name:
-    description: Override the TLS server name we expect in the certificate of the remove server(s)
   es.bulk.actions:
     description: The number of requests that can be enqueued before the bulk processor decides to commit
     default: 1000
