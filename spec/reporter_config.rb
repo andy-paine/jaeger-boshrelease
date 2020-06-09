@@ -1,9 +1,9 @@
 require 'rspec'
 require 'yaml'
 require 'bosh/template/test'
-require_relative 'spec_helper.rb'
+require_relative 'spec_helper'
 
-['jaeger-agent'].each do |job_name|
+shared_examples 'a reporter' do |job_name|
   describe "#{job_name}: reporter configuration" do
     let(:release) { Bosh::Template::Test::ReleaseDir.new(File.join(File.dirname(__FILE__), '../')) }
     let(:job) { release.job(job_name) }

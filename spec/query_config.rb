@@ -1,9 +1,9 @@
 require 'rspec'
 require 'yaml'
 require 'bosh/template/test'
-require_relative 'spec_helper.rb'
+require_relative 'spec_helper'
 
-['jaeger-all-in-one', 'jaeger-query'].each do |job_name|
+shared_examples 'a queryable component' do |job_name|
   describe "#{job_name}: query configuration" do
     let(:release) { Bosh::Template::Test::ReleaseDir.new(File.join(File.dirname(__FILE__), '../')) }
     let(:job) { release.job(job_name) }
