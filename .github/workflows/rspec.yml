@@ -25,4 +25,11 @@ jobs:
         ruby-version: 2.7
         bundler-cache: true # runs 'bundle install' and caches installed gems automatically
     - name: Run tests
-      run: bundle exec rspec
+      run: bundle exec rspec --format RspecJunitFormatter --out results.xml
+    - name: Publish test results
+      uses: dorny/test-reporter@v1
+      if: success() || failure()    # run this step even if previous step failed
+      with:
+        name: RSpec tests
+        path: results.xml
+        reporter: java-junit
