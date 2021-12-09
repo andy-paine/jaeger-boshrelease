@@ -8,6 +8,7 @@ on:
 
 jobs:
   rubocop:
+    name: Run Rubocop
     runs-on: ubuntu-latest
 
     steps:
@@ -22,6 +23,7 @@ jobs:
       with:
         rubocop_version: gemfile
   rspec:
+    name: Run RSpec
     runs-on: ubuntu-latest
 
     steps:
