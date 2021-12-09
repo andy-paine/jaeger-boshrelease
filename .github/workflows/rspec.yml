@@ -1,4 +1,4 @@
-name: RSpec
+name: Test
 
 on:
   push:
@@ -7,7 +7,21 @@ on:
     branches: [ master ]
 
 jobs:
-  Run tests:
+  rubocop:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: 2.7
+        bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+    - name: Run Rubocop
+      uses: reviewdog/action-rubocop@v2
+      with:
+        rubocop_version: gemfile
+  rspec:
     runs-on: ubuntu-latest
 
     steps:
